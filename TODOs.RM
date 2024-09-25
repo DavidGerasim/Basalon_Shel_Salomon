@@ -1,0 +1,14 @@
+In this file we specify what is remaining, bugs and etc.
+
+1. use location services on location input, select from available locations, pass this to the model
+and implement relevant logic in server.
+
+2. got stuck on the adding post screen, didn't understand the reason.
+
+3. same goes for adding post, every input that has to do with location should 
+query existing location from API and not free text.
+
+4. implement query posts by distance and relevance.
+
+5. fix time scheduler on post screen, too dark, can schedule start time after end time.
+
