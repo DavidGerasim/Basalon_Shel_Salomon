@@ -78,27 +78,39 @@ const Signup = ({ navigation }) => {
   const signUp = async () => {
     try {
       // Prepare the form data
-      const response = await fetch('http://your-server-url/signup', {
+      console.log(JSON.stringify(formData));
+      // Make sure you're hitting the correct route (e.g., /signup)
+      const response = await fetch('http://192.168.1.130:3000/user/signup', {  // Add the correct signup endpoint
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify(formData),
+        body: JSON.stringify(formData),  // Send form data in JSON format
       });
   
-      const result = await response.json();
+      // Check if the response is JSON before parsing
+      const contentType = response.headers.get("content-type");
+      
+      if (contentType && contentType.includes("application/json")) {
+        const result = await response.json();  // Parse the JSON response
   
-      // Handle the response
-      if (result.status === 'SUCCESS') {
-        console.log('Signup successful:', result.message);
-        // Optionally navigate to another screen, reset the form, etc.
+        // Handle the response
+        if (result.status === 'SUCCESS') {
+          console.log('Signup successful:', result.message);
+          // Optionally navigate to another screen, reset the form, etc.
+        } else {
+          console.error('Signup failed:', result.message);
+        }
       } else {
-        console.error('Signup failed:', result.message);
+        // If the response is not JSON, log the text response for debugging
+        const text = await response.text();
+        console.error('Unexpected response:', text);
       }
     } catch (error) {
       console.error('Error during signup:', error);
     }
   };
+  
 
   return (
     <SignupStyledContainer style={{ backgroundColor: "#121212" }}>
