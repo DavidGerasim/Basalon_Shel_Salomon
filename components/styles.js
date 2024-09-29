@@ -456,7 +456,6 @@ export const NumberText = styled(Text)`
   font-size: 20px;
 `;
 
-
 // PasswordRestorePage_1 -----------------------------------------------------------
 export const PasswordRestorePage_1StyledContainer = styled(View)`
   flex: 1;
@@ -669,21 +668,23 @@ export const ConfirmRejectSettingsIcon = styled(TouchableOpacity)`
 // NotificationIcon -----------------------------------------------------------
 export const NotificationInnerContainer = styled(View)`
   flex: 1;
-  justify-content: center;
+  justify-content: flex-start; /* כדי למנוע דחיפה של האלמנטים למרכז */
   align-items: center;
-  margin-bottom: 425px;
+  margin-top: 0px; /* הסרנו את המרווח כדי שהכותרת תהיה קרובה יותר לחלק העליון */
 `;
 
 export const NotificationPageTitle = styled(Text)`
   font-size: 30px;
-  text-align: center;
   color: #ffffff;
+  position: absolute;
+  align-items: center; /* מיקום הכותרת בגובה החץ */
+  top: 17px; /* גובה תואם לחץ */
   max-width: 60%;
 `;
 
 export const NotificationStyledFormArea = styled(View)`
   width: 100%;
-  margin-top: 50px;
+  margin-top: 80px; /* נשאיר מרווח אחרי הכותרת */
 `;
 
 export const NotificationItemContainer = styled(View)`
@@ -710,7 +711,7 @@ export const NotificationLine = styled(View)`
 export const NotificationBackIcon = styled(TouchableOpacity)`
   position: absolute;
   top: 30px;
-  left: 20px;
+  left: 10px;
 `;
 
 export const NotificationTouchable = styled(TouchableOpacity)`
@@ -724,46 +725,72 @@ export const NotificationArrowIconContainer = styled(View)`
 
 // Map -----------------------------------------------------------------------
 export const mapStyles = StyleSheet.create({
-   container: {
-     flex: 1, // הקונטיינר תופס את כל הגובה והרוחב של המיכל שלו
-   },
-   map: {
-     flex: 1, // המפה תופסת את כל הגובה והרוחב של הקונטיינר שלה
-   },
-   arrowButton: {
-     position: "absolute", // הכפתור ממוקם בצורה מוחלטת ביחס לקונטיינר האב
-     top: 90, // המרחק מהחלק העליון של הקונטיינר האב
-     left: 15, // המרחק מהצד השמאלי של הקונטיינר האב
-     backgroundColor: "rgba(255, 255, 255, 0.5)", // צבע רקע שקוף למחצה להבטחת נראות הכפתור
-     padding: 10, // שטח פנימי בכפתור, כדי להגדיל את שטח המגע
-     borderRadius: 50, // פינות עגולות לכפתור, כך שהוא ייראה כמו עיגול
-   },
-   modalContainer: {
-     flex: 1, // קונטיינר המודאל תופס את כל הגובה והרוחב של המיכל שלו
-     justifyContent: "center", // ממרכז את התוכן בקונטיינר אנכית
-     alignItems: "center", // ממרכז את התוכן בקונטיינר אופקית
-   },
-   modalContent: {
-     width: "100%", // רוחב המודאל 90% מהרוחב של הקונטיינר האב
-     padding: 20, // שטח פנימי בתוך המודאל
-     backgroundColor: "white", // צבע הרקע של המודאל לבן
-     borderRadius: 10, // פינות עגולות של המודאל
-   },
-   modalTitle: {
-     fontSize: 20, // גודל הפונט של הכותרת במודאל
-     fontWeight: "bold", // עושה את הפונט בולט
-   },
-   closeButton: {
-     marginTop: 20, // רווח מעל הכפתור
-     padding: 10, // שטח פנימי בכפתור
-     backgroundColor: "#007BFF", // צבע רקע כחול לכפתור
-     borderRadius: 5, // פינות עגולות לכפתור
-   },
-   closeButtonText: {
-     color: "white", // צבע הטקסט בכפתור לבן
-     textAlign: "center", // מרכז את הטקסט בתוך הכפתור
-   },
- });
- 
-
-
+  container: {
+    flex: 1, // הקונטיינר תופס את כל הגובה והרוחב של המיכל שלו
+  },
+  map: {
+    flex: 1, // המפה תופסת את כל הגובה והרוחב של הקונטיינר שלה
+  },
+  arrowButton: {
+    position: "absolute", // הכפתור ממוקם בצורה מוחלטת ביחס לקונטיינר האב
+    top: 90, // המרחק מהחלק העליון של הקונטיינר האב
+    left: 15, // המרחק מהצד השמאלי של הקונטיינר האב
+    backgroundColor: "rgba(255, 255, 255, 0.5)", // צבע רקע שקוף למחצה להבטחת נראות הכפתור
+    padding: 10, // שטח פנימי בכפתור, כדי להגדיל את שטח המגע
+    borderRadius: 50, // פינות עגולות לכפתור, כך שהוא ייראה כמו עיגול
+  },
+  modalContainer: {
+    flex: 1, // קונטיינר המודאל תופס את כל הגובה והרוחב של המיכל שלו
+    justifyContent: "center", // ממרכז את התוכן בקונטיינר אנכית
+    alignItems: "center", // ממרכז את התוכן בקונטיינר אופקית
+  },
+  modalContent: {
+    width: "100%", // רוחב המודאל 90% מהרוחב של הקונטיינר האב
+    padding: 20, // שטח פנימי בתוך המודאל
+    backgroundColor: "white", // צבע הרקע של המודאל לבן
+    borderRadius: 10, // פינות עגולות של המודאל
+  },
+  modalTitle: {
+    fontSize: 20, // גודל הפונט של הכותרת במודאל
+    fontWeight: "bold", // עושה את הפונט בולט
+  },
+  closeButton: {
+    marginTop: 20, // רווח מעל הכפתור
+    padding: 10, // שטח פנימי בכפתור
+    backgroundColor: "#007BFF", // צבע רקע כחול לכפתור
+    borderRadius: 5, // פינות עגולות לכפתור
+  },
+  closeButtonText: {
+    color: "white", // צבע הטקסט בכפתור לבן
+    textAlign: "center", // מרכז את הטקסט בתוך הכפתור
+  },
+  closeButton: {
+    position: "absolute",
+    top: 10,
+    right: 10,
+    padding: 10,
+  },
+  closeButtonText: {
+    fontSize: 24,
+    color: "black",
+  },
+  input: {
+    backgroundColor: "#ffffff", // צבע רקע לבן
+    borderColor: "#cccccc", // צבע גבול
+    borderWidth: 1, // רוחב גבול
+    borderRadius: 5, // פינות מעוגלות
+    padding: 10, // רווח פנימי
+    marginVertical: 10, // רווח אנכי בין השדות
+  },
+  sendButton: {
+    backgroundColor: "#4CAF50", // צבע הרקע של הכפתור
+    padding: 10, // רווח פנימי
+    borderRadius: 5, // פינות מעוגלות
+    alignItems: "center", // מרכז את התוכן
+    marginTop: 10, // רווח מעל הכפתור
+  },
+  sendButtonText: {
+    color: "#ffffff", // צבע הטקסט
+    fontWeight: "bold", // משקל הטקסט
+  },
+});
