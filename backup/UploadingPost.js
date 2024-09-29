@@ -101,7 +101,7 @@ const UploadingPost = ({ navigation }) => {
     console.log("Post data:", postData); // לוג של הנתונים שנשלחים ב-POST
 
     try {
-      const response = await fetch("http://10.0.0.14:3000/api/posts", {
+      const response = await fetch("http://172.25.18.98:3000/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

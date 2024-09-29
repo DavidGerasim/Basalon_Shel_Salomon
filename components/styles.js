@@ -402,7 +402,7 @@ export const UploadingPostInputContainer = styled(View)`
   margin-vertical: 10px;
 `;
 
-export const UploadingPostTextInputStyled = styled(TextInput)`
+export const UploadingPostTextInputStyled = styled.TextInput`
   flex: 1;
   padding: 12px;
   padding-left: 10px;
@@ -416,7 +416,7 @@ export const UploadingPostInputLabel = styled(Text)`
   margin-bottom: 5px;
 `;
 
-export const UploadingPostStyledButton = styled(TouchableOpacity)`
+export const UploadingPostStyledButton = styled.TouchableOpacity`
   padding: 15px;
   background-color: #8c4e79;
   justify-content: center;
@@ -431,47 +431,31 @@ export const UploadingPostButtonText = styled(Text)`
   font-size: 16px;
 `;
 
-export const ModalBackground = styled.View`
+// הוספת הסגנונות שהיו בקוד הקודם של StyleSheet
+export const ModalBackground = styled(View)`
   flex: 1;
   justify-content: center;
-  align-items: center;
   background-color: rgba(0, 0, 0, 0.5);
 `;
 
-export const ModalContainer = styled.View`
-  width: 80%;
-  max-height: 50%;
-  background-color: #ffffff;
+export const ModalContainer = styled(View)`
+  background-color: white;
+  margin: 20px;
   padding: 20px;
   border-radius: 10px;
 `;
 
-export const NumberItem = styled.View`
+export const NumberItem = styled(View)`
   padding: 15px;
-  justify-content: center;
   align-items: center;
+  border-bottom-width: 1px;
+  border-bottom-color: #ccc;
 `;
 
-export const NumberText = styled.Text`
+export const NumberText = styled(Text)`
   font-size: 20px;
-  font-weight: bold;
 `;
 
-export const EditButton = styled.View`
-  position: absolute;
-  right: 15px;
-  margin-top: -8px;
-`;
-
-export const EditText = styled.Text`
-  color: #34d399;
-`;
-
-export const AudioButton = styled.View`
-  margin-vertical: 20px;
-  justify-content: center;
-  align-items: center;
-`;
 
 // PasswordRestorePage_1 -----------------------------------------------------------
 export const PasswordRestorePage_1StyledContainer = styled(View)`
@@ -739,19 +723,47 @@ export const NotificationArrowIconContainer = styled(View)`
 `;
 
 // Map -----------------------------------------------------------------------
-export const mapStyles = {
-  container: {
-    flex: 1,
-  },
-  map: {
-    flex: 1,
-  },
-  arrowButton: {
-    position: "absolute",
-    top: 90,
-    left: 15,
-    backgroundColor: "rgba(255, 255, 255, 0.5)", // רקע שקוף להבטחת נראות
-    padding: 10, // שטח מגע מוגדל
-    borderRadius: 50, // כפתור עגול
-  },
-};
+export const mapStyles = StyleSheet.create({
+   container: {
+     flex: 1, // הקונטיינר תופס את כל הגובה והרוחב של המיכל שלו
+   },
+   map: {
+     flex: 1, // המפה תופסת את כל הגובה והרוחב של הקונטיינר שלה
+   },
+   arrowButton: {
+     position: "absolute", // הכפתור ממוקם בצורה מוחלטת ביחס לקונטיינר האב
+     top: 90, // המרחק מהחלק העליון של הקונטיינר האב
+     left: 15, // המרחק מהצד השמאלי של הקונטיינר האב
+     backgroundColor: "rgba(255, 255, 255, 0.5)", // צבע רקע שקוף למחצה להבטחת נראות הכפתור
+     padding: 10, // שטח פנימי בכפתור, כדי להגדיל את שטח המגע
+     borderRadius: 50, // פינות עגולות לכפתור, כך שהוא ייראה כמו עיגול
+   },
+   modalContainer: {
+     flex: 1, // קונטיינר המודאל תופס את כל הגובה והרוחב של המיכל שלו
+     justifyContent: "center", // ממרכז את התוכן בקונטיינר אנכית
+     alignItems: "center", // ממרכז את התוכן בקונטיינר אופקית
+   },
+   modalContent: {
+     width: "100%", // רוחב המודאל 90% מהרוחב של הקונטיינר האב
+     padding: 20, // שטח פנימי בתוך המודאל
+     backgroundColor: "white", // צבע הרקע של המודאל לבן
+     borderRadius: 10, // פינות עגולות של המודאל
+   },
+   modalTitle: {
+     fontSize: 20, // גודל הפונט של הכותרת במודאל
+     fontWeight: "bold", // עושה את הפונט בולט
+   },
+   closeButton: {
+     marginTop: 20, // רווח מעל הכפתור
+     padding: 10, // שטח פנימי בכפתור
+     backgroundColor: "#007BFF", // צבע רקע כחול לכפתור
+     borderRadius: 5, // פינות עגולות לכפתור
+   },
+   closeButtonText: {
+     color: "white", // צבע הטקסט בכפתור לבן
+     textAlign: "center", // מרכז את הטקסט בתוך הכפתור
+   },
+ });
+ 
+
+

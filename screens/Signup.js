@@ -1,15 +1,6 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import {
-  View,
-  TouchableOpacity,
-  TextInput,
-  ScrollView,
-  Button,
-  FlatList,
-  Text,
-  TouchableWithoutFeedback,
-} from "react-native";
+import { View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import {
@@ -22,7 +13,6 @@ import {
   SignupInputLabel,
   SignupStyledButton,
   SignupButtonText,
-  ProfileImageContainer,
 } from "./../components/styles";
 
 import LocationInput from "../components/LocationInputView";
@@ -43,8 +33,6 @@ const Signup = ({ navigation }) => {
 
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
-
-  const handleImageUpload = async () => { }
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -77,40 +65,38 @@ const Signup = ({ navigation }) => {
 
   const signUp = async () => {
     try {
-      // Prepare the form data
       console.log(JSON.stringify(formData));
-      // Make sure you're hitting the correct route (e.g., /signup)
-      const response = await fetch('http://192.168.1.130:3000/user/signup', {  // Add the correct signup endpoint
-        method: 'POST',
+      const response = await fetch("http://10.0.0.14:3000/user/signup", {
+        method: "POST",
         headers: {
-          'Content-Type': 'application/json',
+          "Content-Type": "application/json",
         },
-        body: JSON.stringify(formData),  // Send form data in JSON format
+        body: JSON.stringify(formData),
       });
-  
-      // Check if the response is JSON before parsing
+
       const contentType = response.headers.get("content-type");
-      
+
       if (contentType && contentType.includes("application/json")) {
-        const result = await response.json();  // Parse the JSON response
-  
-        // Handle the response
-        if (result.status === 'SUCCESS') {
-          console.log('Signup successful:', result.message);
-          // Optionally navigate to another screen, reset the form, etc.
+        const result = await response.json();
+
+        if (result.status === "SUCCESS") {
+          console.log("Signup successful:", result.message);
+          // מעביר את השם ושם המשפחה
+          navigation.navigate("Welcome", {
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+          });
         } else {
-          console.error('Signup failed:', result.message);
+          console.error("Signup failed:", result.message);
         }
       } else {
-        // If the response is not JSON, log the text response for debugging
         const text = await response.text();
-        console.error('Unexpected response:', text);
+        console.error("Unexpected response:", text);
       }
     } catch (error) {
-      console.error('Error during signup:', error);
+      console.error("Error during signup:", error);
     }
   };
-  
 
   return (
     <SignupStyledContainer style={{ backgroundColor: "#121212" }}>
@@ -173,9 +159,7 @@ const Signup = ({ navigation }) => {
               placeholder="Write Your Phone number"
               icon="call-outline"
               value={formData.phoneNumber}
-              onChangeText={(value) =>
-                handleInputChange("phoneNumber", value)
-              }
+              onChangeText={(value) => handleInputChange("phoneNumber", value)}
             />
             <MyTextInput
               label="Main Instrument"
@@ -187,12 +171,9 @@ const Signup = ({ navigation }) => {
               }
             />
             <LocationInput
-                  address={formData.address}
-                  onLocationChange={(value) => handleInputChange("address", value)}
-                />
-            <ProfileImageContainer>
-              <Button title="Upload Profile Picture" onPress={handleImageUpload} />
-            </ProfileImageContainer>
+              address={formData.address}
+              onLocationChange={(value) => handleInputChange("address", value)}
+            />
             <SignupStyledButton
               onPress={signUp}
               style={{ backgroundColor: "#8c4e79" }}
