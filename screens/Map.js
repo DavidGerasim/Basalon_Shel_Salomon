@@ -13,6 +13,7 @@ import MapView, { Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { mapStyles } from "./../components/styles";
+import io from "socket.io-client";
 
 const Map = ({ navigation, addNotification }) => {
   const [posts, setPosts] = useState([]);
@@ -24,7 +25,7 @@ const Map = ({ navigation, addNotification }) => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://10.0.0.14:3000/api/posts");
+        const response = await axios.get("http://192.168.1.130:3000/api/posts");
         console.log("Response data:", response.data);
 
         // Check for posts that have already started and remove them
@@ -47,7 +48,42 @@ const Map = ({ navigation, addNotification }) => {
       }
     };
 
+    // Initial fetch of posts
     fetchPosts();
+
+    // Setting up WebSocket connection with Socket.IO
+    const socket = io("http://192.168.1.130:3000"); // Adjust the URL to match your server
+
+    // Listen for "postUpdated" events
+    socket.on("postUpdated", (change) => {
+      console.log("Post updated:", change);
+      
+      // Depending on the change type (insert, update, delete), update the posts state accordingly
+      switch (change.operationType) {
+        case "insert":
+          setPosts((prevPosts) => [...prevPosts, change.fullDocument]);
+          break;
+        case "update":
+          setPosts((prevPosts) =>
+            prevPosts.map((post) =>
+              post._id === change.documentKey._id ? { ...post, ...change.updateDescription.updatedFields } : post
+            )
+          );
+          break;
+        case "delete":
+          setPosts((prevPosts) =>
+            prevPosts.filter((post) => post._id !== change.documentKey._id)
+          );
+          break;
+        default:
+          break;
+      }
+    });
+
+    // Clean up the connection when the component unmounts
+    return () => {
+      socket.disconnect();
+    };
   }, []);
 
   const deletePost = async (postId) => {
