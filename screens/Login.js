@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { View, Text, TouchableOpacity } from "react-native";
+import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import {
   LoginStyledContainer,
@@ -21,6 +21,37 @@ import {
 
 const Login = ({ navigation }) => {
   const [hidePassword, setHidePassword] = useState(true);
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+
+  const handleLogin = async () => {
+    try {
+      const response = await fetch("http://10.0.0.14:3000/user/signin", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
+
+      const data = await response.json();
+
+      if (data.status === "SUCCESS") {
+        console.log("User logged in successfully:", data.data);
+        // העברה לעמוד ה-Welcome עם פרטי המשתמש
+        navigation.navigate("Welcome", {
+          firstName: data.data.firstName,
+          lastName: data.data.lastName,
+        });
+      } else {
+        // הצגת שגיאה אם ההתחברות נכשלה
+        Alert.alert("Login Error", data.message);
+      }
+    } catch (error) {
+      console.error("Error during login: ", error);
+      Alert.alert("Login Error", "An error occurred while logging in");
+    }
+  };
 
   return (
     <LoginStyledContainer style={{ backgroundColor: "#121212" }}>
@@ -34,6 +65,8 @@ const Login = ({ navigation }) => {
             label="Email Address"
             placeholder="example@gmail.com"
             icon="mail-outline"
+            value={email}
+            onChangeText={setEmail}
           />
           <MyTextInput
             label="Password"
@@ -42,13 +75,17 @@ const Login = ({ navigation }) => {
             isPassword={true}
             hidePassword={hidePassword}
             setHidePassword={setHidePassword}
+            value={password}
+            onChangeText={setPassword}
           />
-          <TouchableOpacity onPress={() => navigation.navigate("PasswordRestorePage_1")}>
+          <TouchableOpacity
+            onPress={() => navigation.navigate("PasswordRestorePage_1")}
+          >
             <ForgotPasswordText>Forgot Password?</ForgotPasswordText>
           </TouchableOpacity>
           <LoginStyledButton
             style={{ backgroundColor: "#8c4e79" }}
-            onPress={() => navigation.navigate("Welcome")}
+            onPress={handleLogin}
           >
             <LoginButtonText>Log in</LoginButtonText>
           </LoginStyledButton>

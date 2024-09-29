@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { Ionicons } from "@expo/vector-icons";
 import { TouchableOpacity } from "react-native";
@@ -18,6 +18,33 @@ import {
 } from "./../components/styles";
 
 const Welcome = ({ navigation }) => {
+  const [userData, setUserData] = useState({
+    firstName: "",
+    lastName: "",
+  });
+
+  useEffect(() => {
+    // Fetch user data from the database
+    const fetchUserData = async () => {
+      try {
+        const response = await fetch("http://10.0.0.14:3000/user/profile"); // Change to your actual endpoint
+        const data = await response.json();
+
+        // Assuming your API returns an object with firstName and lastName
+        if (data) {
+          setUserData({
+            firstName: data.firstName,
+            lastName: data.lastName,
+          });
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+      }
+    };
+
+    fetchUserData();
+  }, []);
+
   return (
     <>
       <StatusBar style="light" />
@@ -55,7 +82,7 @@ const Welcome = ({ navigation }) => {
         </WelcomeImageContainer>
 
         {/* כותרת Welcome */}
-        <WelcomePageTitle s>Welcome</WelcomePageTitle>
+        <WelcomePageTitle>Welcome</WelcomePageTitle>
 
         {/* תמונת פרופיל */}
         <WelcomeAvatar
@@ -64,7 +91,9 @@ const Welcome = ({ navigation }) => {
         />
 
         {/* שם המשתמש */}
-        <WelcomeSubTitle>David Gerasim</WelcomeSubTitle>
+        <WelcomeSubTitle>
+          {userData.firstName} {userData.lastName}
+        </WelcomeSubTitle>
 
         {/* מיכל הטופס */}
         <WelcomeContainer>
