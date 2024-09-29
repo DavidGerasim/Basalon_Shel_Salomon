@@ -17,10 +17,11 @@ const Stack = createNativeStackNavigator();
 const RootStack = () => {
   const [notifications, setNotifications] = useState([]);
 
-  const addNotification = (address, date, time) => {
+  // Function to add a new notification
+  const addNotification = (notificationText) => {
     const newNotification = {
-      id: notifications.length + 1, // יצירת מזהה פשוט
-      text: `נקבע פגישה ב ${address} בתאריך ${date} בשעה ${time}`, // טקסט ההודעה
+      id: notifications.length + 1, // Simple ID generation
+      text: notificationText,
     };
     setNotifications((prevNotifications) => [...prevNotifications, newNotification]);
   };
@@ -42,16 +43,18 @@ const RootStack = () => {
         <Stack.Screen name="Login" component={Login} />
         <Stack.Screen name="Signup" component={Signup} />
         <Stack.Screen name="Welcome" component={Welcome} />
+        {/* Update the Map component to include addNotification */}
         <Stack.Screen name="Map">
-          {(props) => <Map {...props} addNotification={addNotification} />} 
+          {(props) => <Map {...props} addNotification={addNotification} />}
         </Stack.Screen>
         <Stack.Screen name="Settings" component={Settings} />
         <Stack.Screen name="UploadingPost" component={UploadingPost} />
         <Stack.Screen name="PasswordRestorePage_1" component={PasswordRestorePage_1} />
         <Stack.Screen name="PasswordRestorePage_2" component={PasswordRestorePage_2} />
         <Stack.Screen name="ConfirmReject" component={ConfirmReject} />
+        {/* Pass notifications and addNotification to NotificationIcon */}
         <Stack.Screen name="NotificationIcon">
-          {(props) => <NotificationIcon {...props} notifications={notifications} />}
+          {(props) => <NotificationIcon {...props} notifications={notifications} addNotification={addNotification} />}
         </Stack.Screen>
       </Stack.Navigator>
     </NavigationContainer>
