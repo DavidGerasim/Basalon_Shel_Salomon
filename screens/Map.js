@@ -25,19 +25,24 @@ const Map = ({ navigation, addNotification }) => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://192.168.1.130:3000/api/posts");
+        const response = await axios.get("http://172.25.18.106:3000/api/posts");
         console.log("Response data:", response.data);
 
-        // Check for posts that have already started and remove them
         const currentTime = new Date();
+
+        // Check for valid posts
         const updatedPosts = response.data.filter((post) => {
+          const eventDate = new Date(post.date);
           const postStartTime = new Date(post.beginningTime);
-          if (postStartTime < currentTime) {
-            // Delete the post from the server
-            deletePost(post._id);
-            return false; // Do not include this post
-          }
-          return true; // Include this post
+
+          // Check conditions: musicians > 0, eventDate >= currentDate, and valid beginningTime
+          return (
+            post.musicians > 0 &&
+            eventDate >= new Date().setHours(0, 0, 0, 0) &&
+            (eventDate > currentTime ||
+              (eventDate.toDateString() === currentTime.toDateString() &&
+                postStartTime >= currentTime))
+          );
         });
 
         setPosts(updatedPosts);
@@ -52,12 +57,12 @@ const Map = ({ navigation, addNotification }) => {
     fetchPosts();
 
     // Setting up WebSocket connection with Socket.IO
-    const socket = io("http://192.168.1.130:3000"); // Adjust the URL to match your server
+    const socket = io("http://172.25.18.106:3000");
 
     // Listen for "postUpdated" events
     socket.on("postUpdated", (change) => {
       console.log("Post updated:", change);
-      
+
       // Depending on the change type (insert, update, delete), update the posts state accordingly
       switch (change.operationType) {
         case "insert":
@@ -66,7 +71,9 @@ const Map = ({ navigation, addNotification }) => {
         case "update":
           setPosts((prevPosts) =>
             prevPosts.map((post) =>
-              post._id === change.documentKey._id ? { ...post, ...change.updateDescription.updatedFields } : post
+              post._id === change.documentKey._id
+                ? { ...post, ...change.updateDescription.updatedFields }
+                : post
             )
           );
           break;
@@ -88,7 +95,7 @@ const Map = ({ navigation, addNotification }) => {
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://10.0.0.14:3000/api/posts/${postId}`);
+      await axios.delete(`http://172.25.18.106:3000/api/posts/${postId}`);
       console.log(`Post with ID ${postId} deleted successfully`);
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -147,7 +154,7 @@ const Map = ({ navigation, addNotification }) => {
 
     try {
       const response = await axios.put(
-        `http://10.0.0.14:3000/api/posts/${selectedPost._id}`,
+        `http://172.25.18.106:3000/api/posts/${selectedPost._id}`,
         {
           musicians: updatedMusicians,
           friends: updatedFriends,
@@ -204,25 +211,23 @@ const Map = ({ navigation, addNotification }) => {
           longitudeDelta: 1.5,
         }}
       >
-        {posts
-          .filter((post) => post.musicians > 0) // סנן את הפוסטים כך שרק פוסטים עם musicians > 0 יוצגו
-          .map((post, index) => {
-            const latitude = parseFloat(post.city.latitude);
-            const longitude = parseFloat(post.city.longitude);
+        {posts.map((post, index) => {
+          const latitude = parseFloat(post.city.latitude);
+          const longitude = parseFloat(post.city.longitude);
 
-            if (!isNaN(latitude) && !isNaN(longitude)) {
-              return (
-                <Marker
-                  key={index}
-                  coordinate={{ latitude, longitude }}
-                  pinColor="red"
-                  title={post.city.description}
-                  onPress={() => handleMarkerPress(post)}
-                />
-              );
-            }
-            return null;
-          })}
+          if (!isNaN(latitude) && !isNaN(longitude)) {
+            return (
+              <Marker
+                key={index}
+                coordinate={{ latitude, longitude }}
+                pinColor="red"
+                title={post.city.description}
+                onPress={() => handleMarkerPress(post)}
+              />
+            );
+          }
+          return null;
+        })}
       </MapView>
 
       <TouchableOpacity
@@ -246,12 +251,30 @@ const Map = ({ navigation, addNotification }) => {
                 {selectedPost?.city.description}
               </Text>
               <Text>
-                Beginning Time:{" "}
-                {new Date(selectedPost?.beginningTime).toLocaleString()}
+                Event Date:{" "}
+                {selectedPost?.date
+                  ? new Date(selectedPost.date).toLocaleDateString()
+                  : "Invalid Date"}
               </Text>
               <Text>
-                End Time: {new Date(selectedPost?.endTime).toLocaleString()}
+                Beginning Time:{" "}
+                {selectedPost?.beginningTime
+                  ? new Date(selectedPost.beginningTime).toLocaleTimeString(
+                      [],
+                      { hour: "2-digit", minute: "2-digit" }
+                    )
+                  : "No Time"}
               </Text>
+              <Text>
+                End Time:{" "}
+                {selectedPost?.endTime
+                  ? new Date(selectedPost.endTime).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })
+                  : "No Time"}
+              </Text>
+
               <Text>Musicians: {selectedPost?.musicians}</Text>
               <Text>Friends: {selectedPost?.friends}</Text>
 
@@ -269,15 +292,16 @@ const Map = ({ navigation, addNotification }) => {
                 keyboardType="numeric"
                 style={mapStyles.input}
               />
+
               <TouchableOpacity
-                onPress={isSendButtonEnabled ? updatePost : null}
                 style={[
                   mapStyles.sendButton,
-                  { opacity: isSendButtonEnabled ? 1 : 0.5 },
+                  { backgroundColor: isSendButtonEnabled ? "green" : "gray" },
                 ]}
                 disabled={!isSendButtonEnabled}
+                onPress={updatePost}
               >
-                <Text style={mapStyles.sendButtonText}>SEND</Text>
+                <Text style={mapStyles.sendButtonText}>Send</Text>
               </TouchableOpacity>
             </View>
           </View>

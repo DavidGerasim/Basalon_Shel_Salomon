@@ -29,7 +29,7 @@ const Login = ({ navigation }) => {
       // המרת המייל לאותיות קטנות
       const normalizedEmail = email.toLowerCase();
 
-      const response = await fetch("http://172.25.18.106:3000/user/signin", {
+      const response = await fetch("http://10.0.0.14:3000/user/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

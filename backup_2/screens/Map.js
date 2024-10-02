@@ -25,7 +25,7 @@ const Map = ({ navigation, addNotification }) => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://10.0.0.14:3000/api/posts");
+        const response = await axios.get("http://172.25.18.104:3000/api/posts");
         console.log("Response data:", response.data);
 
         // Check for posts that have already started and remove them
@@ -52,7 +52,7 @@ const Map = ({ navigation, addNotification }) => {
     fetchPosts();
 
     // Setting up WebSocket connection with Socket.IO
-    const socket = io("http://10.0.0.14:3000"); // Adjust the URL to match your server
+    const socket = io("http://172.25.18.104:3000"); // Adjust the URL to match your server
 
     // Listen for "postUpdated" events
     socket.on("postUpdated", (change) => {
@@ -90,7 +90,7 @@ const Map = ({ navigation, addNotification }) => {
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://10.0.0.14:3000/api/posts/${postId}`);
+      await axios.delete(`http://172.25.18.104:3000/api/posts/${postId}`);
       console.log(`Post with ID ${postId} deleted successfully`);
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -149,7 +149,7 @@ const Map = ({ navigation, addNotification }) => {
 
     try {
       const response = await axios.put(
-        `http://10.0.0.14:3000/api/posts/${selectedPost._id}`,
+        `http://172.25.18.104:3000/api/posts/${selectedPost._id}`,
         {
           musicians: updatedMusicians,
           friends: updatedFriends,
@@ -284,7 +284,7 @@ const Map = ({ navigation, addNotification }) => {
               <TouchableOpacity
                 style={[
                   mapStyles.sendButton,
-                  { backgroundColor: isSendButtonEnabled ? "blue" : "gray" },
+                  { backgroundColor: isSendButtonEnabled ? "green" : "gray" },
                 ]}
                 disabled={!isSendButtonEnabled}
                 onPress={updatePost}

@@ -284,7 +284,7 @@ const Map = ({ navigation, addNotification }) => {
               <TouchableOpacity
                 style={[
                   mapStyles.sendButton,
-                  { backgroundColor: isSendButtonEnabled ? "blue" : "gray" },
+                  { backgroundColor: isSendButtonEnabled ? "green" : "gray" },
                 ]}
                 disabled={!isSendButtonEnabled}
                 onPress={updatePost}

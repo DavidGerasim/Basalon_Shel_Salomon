@@ -1,4 +1,4 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { StatusBar } from "expo-status-bar";
 import {
   View,
@@ -25,18 +25,19 @@ import {
 } from "./../components/styles";
 import axios from "axios";
 import LocationInput from "../components/LocationInputView";
-import MyTextInput from "../components/MyTextInput"; // ודא שכתובת זו נכונה
+import { UserContext } from "../context/UserContext"; // ייבוא הקשר למשתמש
 
 const GOOGLE_PLACES_API_KEY = "YOUR_GOOGLE_PLACES_API_KEY";
 
 const UploadingPost = ({ navigation }) => {
+  const { userId } = useContext(UserContext); // קבלת ה-user ID מהקשר
   const [beginningTime, setBeginningTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
-  const [selectedDate, setSelectedDate] = useState(new Date());
+  const [selectedDate, setSelectedDate] = useState(new Date()); // סטייט לתאריך
 
   const [showBeginningPicker, setShowBeginningPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
-  const [showDatePicker, setShowDatePicker] = useState(false);
+  const [showDatePicker, setShowDatePicker] = useState(false); // סטייט לפתיחת בחירת תאריך
 
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
@@ -52,47 +53,11 @@ const UploadingPost = ({ navigation }) => {
   });
 
   const handleInputChange = (field, value) => {
-    // המרה למספר
-    const numberValue = parseInt(value, 10);
-
-    if (field === "musicians") {
-      // בדוק אם הערך הוא מספר חיובי שלם
-      if (value === "" || (numberValue > 0 && Number.isInteger(numberValue))) {
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          [field]: value,
-        }));
-        console.log(`Input changed - ${field}: ${value}`);
-      } else {
-        // הצג התראה מיידית על קלט לא חוקי
-        Alert.alert(
-          "Invalid Input",
-          "Please enter a positive whole number for musicians."
-        );
-      }
-    } else if (field === "friends") {
-      // בדוק אם הערך הוא מספר חיובי שלם
-      if (value === "" || (numberValue >= 0 && Number.isInteger(numberValue))) {
-        setFormData((prevFormData) => ({
-          ...prevFormData,
-          [field]: value,
-        }));
-        console.log(`Input changed - ${field}: ${value}`);
-      } else {
-        // הצג התראה מיידית על קלט לא חוקי
-        Alert.alert(
-          "Invalid Input",
-          "Please enter a non-negative whole number for friends."
-        );
-      }
-    } else {
-      // עבור שדות אחרים, עדכן כרגיל
-      setFormData((prevFormData) => ({
-        ...prevFormData,
-        [field]: value,
-      }));
-      console.log(`Input changed - ${field}: ${value}`);
-    }
+    setFormData((prevFormData) => ({
+      ...prevFormData,
+      [field]: value,
+    }));
+    console.log(`Input changed - ${field}: ${value}`);
   };
 
   const handleLocationChange = async (value) => {
@@ -126,8 +91,9 @@ const UploadingPost = ({ navigation }) => {
     setMessage("");
 
     const postData = {
+      userId, // הוספת ה-user ID לנתוני ה-POST
       city: formData.city,
-      date: selectedDate.toISOString(),
+      date: selectedDate.toISOString(), // הוספת תאריך לנתוני ה-POST
       beginningTime: beginningTime.toISOString(),
       endTime: endTime.toISOString(),
       musicians: formData.musicians,
@@ -139,7 +105,7 @@ const UploadingPost = ({ navigation }) => {
     console.log("Post data:", postData);
 
     try {
-      const response = await fetch("http://172.25.18.106:3000/api/posts", {
+      const response = await fetch("http://172.25.18.104:3000/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -177,51 +143,22 @@ const UploadingPost = ({ navigation }) => {
   const onBeginningTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || beginningTime;
     setShowBeginningPicker(false);
-
-    // צור תאריך חדש שמשלב את התאריך הנבחר עם הזמן החדש
-    const combinedBeginningTime = new Date(selectedDate);
-    combinedBeginningTime.setHours(currentTime.getHours());
-    combinedBeginningTime.setMinutes(currentTime.getMinutes());
-
-    // Check if the combined time is after the current time
-    if (combinedBeginningTime > new Date()) {
-      setBeginningTime(currentTime);
-      console.log("Beginning time changed:", currentTime);
-    } else {
-      Alert.alert("Invalid Time", "Beginning time cannot be in the past.");
-    }
+    setBeginningTime(currentTime);
+    console.log("Beginning time changed:", currentTime);
   };
 
   const onEndTimeChange = (event, selectedTime) => {
     const currentTime = selectedTime || endTime;
     setShowEndPicker(false);
-
-    // Check if the selected time is after the beginning time
-    if (currentTime > beginningTime) {
-      setEndTime(currentTime);
-      console.log("End time changed:", currentTime);
-    } else {
-      Alert.alert("Invalid Time", "End time must be after beginning time.");
-    }
+    setEndTime(currentTime);
+    console.log("End time changed:", currentTime);
   };
 
   const onDateChange = (event, selectedDate) => {
     const currentDate = selectedDate || selectedDate;
     setShowDatePicker(false);
-
     setSelectedDate(currentDate);
-    console.log("Selected date:", currentDate);
-  };
-
-  const isFormValid = () => {
-    return (
-      formData.city &&
-      selectedDate &&
-      beginningTime &&
-      endTime &&
-      formData.musicians &&
-      formData.friends
-    );
+    console.log("Selected date:", currentDate); // לוג של תאריך נבחר
   };
 
   return (
@@ -258,7 +195,6 @@ const UploadingPost = ({ navigation }) => {
             <LocationInput
               address={formData.city}
               onLocationChange={(value) => handleLocationChange(value)}
-              onLocationSelect={handleLocationSelect} // הוספת הפונקציה הזו
             />
 
             {/* Date Picker Input */}
@@ -302,7 +238,7 @@ const UploadingPost = ({ navigation }) => {
             {/* Musicians Input */}
             <UploadingPostInputLabel>Musicians</UploadingPostInputLabel>
             <MyTextInput
-              placeholder="Choose number of musicians"
+              placeholder="Choose a number of musicians"
               icon="musical-notes-outline"
               value={formData.musicians}
               onChangeText={(text) => handleInputChange("musicians", text)}
@@ -312,8 +248,8 @@ const UploadingPost = ({ navigation }) => {
             {/* Friends Input */}
             <UploadingPostInputLabel>Friends</UploadingPostInputLabel>
             <MyTextInput
-              placeholder="Choose number of friends"
-              icon="person-outline"
+              placeholder="Choose a number of friends"
+              icon="people-outline"
               value={formData.friends}
               onChangeText={(text) => handleInputChange("friends", text)}
               keyboardType="numeric"
@@ -322,7 +258,7 @@ const UploadingPost = ({ navigation }) => {
             {/* Instruments Input */}
             <UploadingPostInputLabel>Instruments</UploadingPostInputLabel>
             <MyTextInput
-              placeholder="What do you have?"
+              placeholder="What musical instrument do you have?"
               icon="musical-notes-outline"
               value={formData.instruments}
               onChangeText={(text) => handleInputChange("instruments", text)}
@@ -331,7 +267,7 @@ const UploadingPost = ({ navigation }) => {
             {/* Comment Input */}
             <UploadingPostInputLabel>Comment</UploadingPostInputLabel>
             <MyTextInput
-              placeholder="If you want..."
+              placeholder="Comment"
               icon="chatbox-outline"
               value={formData.comment}
               onChangeText={(text) => handleInputChange("comment", text)}
@@ -339,56 +275,44 @@ const UploadingPost = ({ navigation }) => {
 
             {/* Post Button */}
             <UploadingPostStyledButton
+              style={{ marginTop: 10 }}
               onPress={handlePost}
-              disabled={!isFormValid()} // Disable button if form is not valid
-              style={{
-                backgroundColor: isFormValid() ? "#528DD0" : "#B0C4DE", // Change color based on validity
-              }}
+              disabled={loading}
             >
               <UploadingPostButtonText>
-                {loading ? "Uploading..." : "Upload Post"}
+                {loading ? "Loading..." : "Upload Post"}
               </UploadingPostButtonText>
             </UploadingPostStyledButton>
 
-            {/* Message Display */}
-            {message ? (
-              <Text style={{ color: "green", marginTop: 10 }}>{message}</Text>
-            ) : null}
+            {/* Feedback Message */}
+            {message ? <Text>{message}</Text> : null}
           </UploadingPostFormArea>
         </UploadingPostInnerContainer>
       </ScrollView>
-
-      {/* DateTime Picker for Date */}
-      {showDatePicker && (
-        <DateTimePicker
-          testID="dateTimePicker"
-          value={selectedDate}
-          mode="date"
-          display="default"
-          onChange={onDateChange}
-          minimumDate={new Date()} // הגדרת תאריך מקסימלי להיום
-        />
-      )}
-
-      {/* DateTime Picker for Beginning Time */}
       {showBeginningPicker && (
         <DateTimePicker
-          testID="dateTimePicker"
           value={beginningTime}
           mode="time"
+          is24Hour={true}
           display="default"
           onChange={onBeginningTimeChange}
         />
       )}
-
-      {/* DateTime Picker for End Time */}
       {showEndPicker && (
         <DateTimePicker
-          testID="dateTimePicker"
           value={endTime}
           mode="time"
+          is24Hour={true}
           display="default"
           onChange={onEndTimeChange}
+        />
+      )}
+      {showDatePicker && (
+        <DateTimePicker
+          value={selectedDate}
+          mode="date"
+          display="default"
+          onChange={onDateChange}
         />
       )}
     </UploadingPostStyledContainer>

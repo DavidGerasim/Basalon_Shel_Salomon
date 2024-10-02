@@ -27,7 +27,7 @@ const Welcome = ({ navigation }) => {
     // Fetch user data from the database
     const fetchUserData = async () => {
       try {
-        const response = await fetch("http://172.25.18.106:3000/user/profile"); // Change to your actual endpoint
+        const response = await fetch("http://172.25.18.104:3000/user/profile"); // Change to your actual endpoint
         const data = await response.json();
         
         // Assuming your API returns an object with firstName and lastName

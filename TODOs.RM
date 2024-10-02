@@ -13,3 +13,5 @@ query existing location from API and not free text.
 5. fix time scheduler on post screen, too dark, can schedule start time after end time.
 
 6. change server policy to any one can connect to your cluster for development
+
+7. soket.io is not working.

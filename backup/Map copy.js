@@ -25,19 +25,25 @@ const Map = ({ navigation, addNotification }) => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://10.0.0.14:3000/api/posts");
+        const response = await axios.get("http://172.25.18.104:3000/api/posts");
         console.log("Response data:", response.data);
 
-        // Check for posts that have already started and remove them
         const currentTime = new Date();
+
+        // Check for posts that have already started and remove them
         const updatedPosts = response.data.filter((post) => {
+          const postStartTime = new Date(post.beginningTime); // Get the start time of the post
           const postEndTime = new Date(post.endTime); // Get the end time of the post
-          if (postEndTime < currentTime) {
+
+          // Check if the post has already started or ended
+          if (postStartTime < currentTime) {
             // Delete the post from the server
             deletePost(post._id);
             return false; // Do not include this post
           }
-          return true; // Include this post
+
+          // Include posts that have not started or that are still ongoing
+          return post.musicians > 0 && postEndTime >= currentTime;
         });
 
         setPosts(updatedPosts);
@@ -52,7 +58,7 @@ const Map = ({ navigation, addNotification }) => {
     fetchPosts();
 
     // Setting up WebSocket connection with Socket.IO
-    const socket = io("http://10.0.0.14:3000"); // Adjust the URL to match your server
+    const socket = io("http://172.25.18.104:3000"); // Adjust the URL to match your server
 
     // Listen for "postUpdated" events
     socket.on("postUpdated", (change) => {
@@ -90,7 +96,7 @@ const Map = ({ navigation, addNotification }) => {
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://10.0.0.14:3000/api/posts/${postId}`);
+      await axios.delete(`http://172.25.18.104:3000/api/posts/${postId}`);
       console.log(`Post with ID ${postId} deleted successfully`);
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -149,7 +155,7 @@ const Map = ({ navigation, addNotification }) => {
 
     try {
       const response = await axios.put(
-        `http://10.0.0.14:3000/api/posts/${selectedPost._id}`,
+        `http://172.25.18.104:3000/api/posts/${selectedPost._id}`,
         {
           musicians: updatedMusicians,
           friends: updatedFriends,
@@ -284,7 +290,7 @@ const Map = ({ navigation, addNotification }) => {
               <TouchableOpacity
                 style={[
                   mapStyles.sendButton,
-                  { backgroundColor: isSendButtonEnabled ? "blue" : "gray" },
+                  { backgroundColor: isSendButtonEnabled ? "green" : "gray" },
                 ]}
                 disabled={!isSendButtonEnabled}
                 onPress={updatePost}
