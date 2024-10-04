@@ -4,9 +4,6 @@ import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { SignupInputContainer, SignupTextInputStyled, SignupInputLabel } from "./../components/styles";
 
-// Your Google API Key
-const GOOGLE_PLACES_API_KEY = "AIzaSyB8wLexQ_Hgu8CHvbn-7kYZjyYbFlmcvnc";
-
 const LocationInput = ({ address, onLocationChange }) => {
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -16,15 +13,15 @@ const LocationInput = ({ address, onLocationChange }) => {
   const handleLocationChange = async (value) => {
     onLocationChange(value); // Pass the entered value back to the parent component
 
-    // Fetch location suggestions from Google Places API
+    // Fetch location suggestions from OpenStreetMap (Nominatim API)
     if (value.length > 2) {
       setLoading(true);
       try {
         const response = await axios.get(
-          `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${value}&key=${GOOGLE_PLACES_API_KEY}&limit=5`
+          `https://nominatim.openstreetmap.org/search?q=${value}&format=json&addressdetails=1&limit=5`
         );
 
-        const suggestions = response.data.predictions;
+        const suggestions = response.data;
         setLocationSuggestions(suggestions);
         setShowSuggestions(true);
       } catch (error) {
@@ -38,34 +35,17 @@ const LocationInput = ({ address, onLocationChange }) => {
     }
   };
 
-  // Fetch detailed place information (lat, lng) using place_id
-  const fetchLocationDetails = async (placeId) => {
-    try {
-      const detailsResponse = await axios.get(
-        `https://maps.googleapis.com/maps/api/place/details/json?place_id=${placeId}&key=${GOOGLE_PLACES_API_KEY}`
-      );
-      const locationDetails = detailsResponse.data.result.geometry.location;
-      return locationDetails;
-    } catch (error) {
-      console.error("Error fetching location details:", error);
-      return null;
-    }
-  };
-
   // Handle location selection from suggestions
-  const handleLocationSelect = async (item) => {
-    const { description, place_id } = item;
-    const locationDetails = await fetchLocationDetails(place_id);
-    if (locationDetails) {
-      const result = {
-        description: description,
-        latitude: locationDetails.lat,
-        longitude: locationDetails.lng,
-      };
+  const handleLocationSelect = (item) => {
+    const { display_name, lat, lon } = item;
+    const result = {
+      description: display_name,
+      latitude: lat,
+      longitude: lon,
+    };
 
-      console.log("Selected location details:", result);
-      onLocationChange(result); // Update the parent component with the full location data
-    }
+    console.log("Selected location details:", result);
+    onLocationChange(result); // Update the parent component with the full location data
     setShowSuggestions(false);
   };
 
@@ -94,9 +74,9 @@ const LocationInput = ({ address, onLocationChange }) => {
             borderColor: "#ccc",
           }}
         >
-          {locationSuggestions.map((item) => (
+          {locationSuggestions.map((item, index) => (
             <TouchableOpacity
-              key={item.place_id}
+              key={index}
               onPress={() => handleLocationSelect(item)}
               style={{
                 padding: 10,
@@ -104,7 +84,7 @@ const LocationInput = ({ address, onLocationChange }) => {
                 borderColor: "#ccc",
               }}
             >
-              <Text style={{ color: "#000" }}>{item.description}</Text>
+              <Text style={{ color: "#000" }}>{item.display_name}</Text>
             </TouchableOpacity>
           ))}
         </ScrollView>

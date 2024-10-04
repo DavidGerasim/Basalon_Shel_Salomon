@@ -1,7 +1,7 @@
 import React, { useEffect } from "react";
 import RootStack from "./navigators/RootStack";
-import { I18nManager } from "react-native";
-import { Alert } from "react-native";
+import { I18nManager, Alert } from "react-native";
+import auth from '@react-native-firebase/auth'; // יבוא Firebase Auth
 
 export default function App() {
   useEffect(() => {
@@ -24,29 +24,3 @@ export default function App() {
 
   return <RootStack />;
 }
-
-// import React from "react";
-// import RootStack from "./navigators/RootStack";
-// import { I18nManager } from "react-native";
-// I18nManager.forceRTL(false); // השבתת RTL
-// I18nManager.allowRTL(false); // מניעת הפעלת RTL באפליקציה
-
-// export default function App() {
-//   return <RootStack />;
-// }
-
-// import React from "react";
-// import Login from "./screens/Login";
-// import Signup from "./screens/Signup";
-// import Welcome from "./screens/Welcome";
-// import Map from "./screens/Map";
-// import Settings from "./screens/Settings";
-// import UploadingPost from "./screens/UploadingPost";
-// import PasswordRestorePage_1 from "./screens/PasswordRestorePage_1";
-// import PasswordRestorePage_2 from "./screens/PasswordRestorePage_2";
-// import ConfirmReject from "./screens/ConfirmReject";
-// import NotificationIcon from "./screens/NotificationIcon";
-
-// export default function App() {
-//   return <PasswordRestorePage_2 />;
-// }

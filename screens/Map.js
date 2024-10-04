@@ -7,7 +7,6 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
-  Keyboard,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
@@ -25,7 +24,7 @@ const Map = ({ navigation, addNotification }) => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://172.25.18.106:3000/api/posts");
+        const response = await axios.get("http://172.25.18.108:3000/api/posts");
         console.log("Response data:", response.data);
 
         const currentTime = new Date();
@@ -57,7 +56,7 @@ const Map = ({ navigation, addNotification }) => {
     fetchPosts();
 
     // Setting up WebSocket connection with Socket.IO
-    const socket = io("http://172.25.18.106:3000");
+    const socket = io("http://172.25.18.108:3000");
 
     // Listen for "postUpdated" events
     socket.on("postUpdated", (change) => {
@@ -95,7 +94,7 @@ const Map = ({ navigation, addNotification }) => {
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://172.25.18.106:3000/api/posts/${postId}`);
+      await axios.delete(`http://172.25.18.108:3000/api/posts/${postId}`);
       console.log(`Post with ID ${postId} deleted successfully`);
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -154,7 +153,7 @@ const Map = ({ navigation, addNotification }) => {
 
     try {
       const response = await axios.put(
-        `http://172.25.18.106:3000/api/posts/${selectedPost._id}`,
+        `http://172.25.18.108:3000/api/posts/${selectedPost._id}`,
         {
           musicians: updatedMusicians,
           friends: updatedFriends,
@@ -241,12 +240,6 @@ const Map = ({ navigation, addNotification }) => {
         <TouchableWithoutFeedback onPress={handleCloseModal}>
           <View style={mapStyles.modalContainer}>
             <View style={mapStyles.modalContent}>
-              <TouchableOpacity
-                onPress={handleCloseModal}
-                style={mapStyles.closeButton}
-              >
-                <Text style={mapStyles.closeButtonText}>×</Text>
-              </TouchableOpacity>
               <Text style={mapStyles.modalTitle}>
                 {selectedPost?.city.description}
               </Text>
@@ -294,12 +287,12 @@ const Map = ({ navigation, addNotification }) => {
               />
 
               <TouchableOpacity
-                style={[
-                  mapStyles.sendButton,
-                  { backgroundColor: isSendButtonEnabled ? "green" : "gray" },
-                ]}
-                disabled={!isSendButtonEnabled}
                 onPress={updatePost}
+                disabled={!isSendButtonEnabled}
+                style={{
+                  ...mapStyles.sendButton,
+                  backgroundColor: isSendButtonEnabled ? "blue" : "gray",
+                }}
               >
                 <Text style={mapStyles.sendButtonText}>Send</Text>
               </TouchableOpacity>

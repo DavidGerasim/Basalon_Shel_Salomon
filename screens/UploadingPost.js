@@ -27,8 +27,6 @@ import axios from "axios";
 import LocationInput from "../components/LocationInputView";
 import MyTextInput from "../components/MyTextInput"; // ודא שכתובת זו נכונה
 
-const GOOGLE_PLACES_API_KEY = "YOUR_GOOGLE_PLACES_API_KEY";
-
 const UploadingPost = ({ navigation }) => {
   const [beginningTime, setBeginningTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
@@ -96,30 +94,38 @@ const UploadingPost = ({ navigation }) => {
   };
 
   const handleLocationChange = async (value) => {
-    handleInputChange("city", value);
+   handleInputChange("city", value);
+ 
+   if (value.length > 2) {
+     try {
+       const response = await axios.get(
+         `https://nominatim.openstreetmap.org/search?q=${value}&format=json&addressdetails=1`
+       );
+       // טען את התוצאות מה-Nominatim
+       const suggestions = response.data.map((location) => ({
+         display_name: location.display_name,
+         // תוכל להוסיף יותר פרטים אם צריך
+       }));
+ 
+       setLocationSuggestions(suggestions);
+       setShowSuggestions(true);
+       console.log("Location suggestions fetched:", suggestions);
+     } catch (error) {
+       console.error("Error fetching location suggestions: ", error);
+     }
+   } else {
+     setLocationSuggestions([]);
+     setShowSuggestions(false);
+   }
+ };
+ 
 
-    if (value.length > 2) {
-      try {
-        const response = await axios.get(
-          `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${value}&key=${GOOGLE_PLACES_API_KEY}`
-        );
-        setLocationSuggestions(response.data.predictions);
-        setShowSuggestions(true);
-        console.log("Location suggestions fetched:", response.data.predictions);
-      } catch (error) {
-        console.error("Error fetching location suggestions: ", error);
-      }
-    } else {
-      setLocationSuggestions([]);
-      setShowSuggestions(false);
-    }
-  };
-
-  const handleLocationSelect = (address) => {
-    handleInputChange("city", address);
-    setShowSuggestions(false);
-    console.log(`Location selected: ${address}`);
-  };
+ const handleLocationSelect = (address) => {
+   handleInputChange("city", address.display_name); // השתמש בשם התצוגה
+   setShowSuggestions(false);
+   console.log(`Location selected: ${address.display_name}`);
+ };
+ 
 
   const handlePost = async () => {
     setLoading(true);
@@ -139,7 +145,7 @@ const UploadingPost = ({ navigation }) => {
     console.log("Post data:", postData);
 
     try {
-      const response = await fetch("http://172.25.18.106:3000/api/posts", {
+      const response = await fetch("http://172.25.18.108:3000/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

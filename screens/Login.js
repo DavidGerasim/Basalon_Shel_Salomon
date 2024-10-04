@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
 import { View, Text, TouchableOpacity, Alert } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   LoginStyledContainer,
   LoginInnerContainer,
@@ -26,10 +27,9 @@ const Login = ({ navigation }) => {
 
   const handleLogin = async () => {
     try {
-      // המרת המייל לאותיות קטנות
       const normalizedEmail = email.toLowerCase();
 
-      const response = await fetch("http://172.25.18.106:3000/user/signin", {
+      const response = await fetch("http://172.25.18.108:3000/user/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -37,17 +37,21 @@ const Login = ({ navigation }) => {
         body: JSON.stringify({ email: normalizedEmail, password }),
       });
 
-      const data = await response.json();
+      const textResponse = await response.text(); // קריאת התגובה כטקסט
+      console.log("Raw response:", textResponse); // הדפסת התגובה הגולמית
+
+      const data = JSON.parse(textResponse); // פענוח התגובה כ-JSON
+      console.log("Response data:", data);
 
       if (data.status === "SUCCESS") {
-        console.log("User logged in successfully:", data.data);
-        // העברה לעמוד ה-Welcome עם פרטי המשתמש
+        console.log("User logged in successfully:", data);
+        await AsyncStorage.setItem("token", data.token);
+
         navigation.navigate("Welcome", {
-          firstName: data.data.firstName,
-          lastName: data.data.lastName,
+          firstName: data.firstName,
+          lastName: data.lastName,
         });
       } else {
-        // הצגת שגיאה אם ההתחברות נכשלה
         Alert.alert("Login Error", data.message);
       }
     } catch (error) {

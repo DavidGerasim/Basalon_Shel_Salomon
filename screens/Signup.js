@@ -17,8 +17,6 @@ import {
 
 import LocationInput from "../components/LocationInputView";
 
-const GOOGLE_PLACES_API_KEY = "YOUR_GOOGLE_PLACES_API_KEY";
-
 const Signup = ({ navigation }) => {
   const [formData, setFormData] = useState({
     firstName: "",
@@ -34,6 +32,9 @@ const Signup = ({ navigation }) => {
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
 
+  const [showPassword, setShowPassword] = useState(false); // מצב לסיסמה
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false); // מצב לאישור הסיסמה
+
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
   };
@@ -41,13 +42,13 @@ const Signup = ({ navigation }) => {
   const handleLocationChange = async (value) => {
     handleInputChange("address", value);
 
-    // Fetch location suggestions from Google Places API
+    // Fetch location suggestions from OpenStreetMap API
     if (value.length > 2) {
       try {
         const response = await axios.get(
-          `https://maps.googleapis.com/maps/api/place/autocomplete/json?input=${value}&key=${GOOGLE_PLACES_API_KEY}`
+          `https://nominatim.openstreetmap.org/search?q=${value}&format=json&addressdetails=1&limit=5`
         );
-        setLocationSuggestions(response.data.predictions);
+        setLocationSuggestions(response.data);
         setShowSuggestions(true);
       } catch (error) {
         console.error("Error fetching location suggestions: ", error);
@@ -59,14 +60,14 @@ const Signup = ({ navigation }) => {
   };
 
   const handleLocationSelect = (address) => {
-    handleInputChange("address", address);
+    handleInputChange("address", address.display_name);
     setShowSuggestions(false);
   };
 
   const signUp = async () => {
     try {
       console.log(JSON.stringify(formData));
-      const response = await fetch("http://172.25.18.106:3000/user/signup", {
+      const response = await fetch("http://172.25.18.108:3000/user/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -141,18 +142,24 @@ const Signup = ({ navigation }) => {
               placeholder="password"
               icon="lock-closed-outline"
               isPassword={true}
+              secureTextEntry={!showPassword} // משתמש במצב
               value={formData.password}
               onChangeText={(value) => handleInputChange("password", value)}
+              togglePasswordVisibility={() => setShowPassword(!showPassword)} // פונקציה לשינוי מצב
             />
             <MyTextInput
               label="Confirm Password"
               placeholder="Confirm Your password"
               icon="lock-closed-outline"
               isPassword={true}
+              secureTextEntry={!showConfirmPassword} // משתמש במצב
               value={formData.confirmPassword}
               onChangeText={(value) =>
                 handleInputChange("confirmPassword", value)
               }
+              togglePasswordVisibility={() =>
+                setShowConfirmPassword(!showConfirmPassword)
+              } // פונקציה לשינוי מצב
             />
             <MyTextInput
               label="Phone Number"
@@ -187,14 +194,28 @@ const Signup = ({ navigation }) => {
   );
 };
 
-const MyTextInput = ({ label, icon, isPassword, ...props }) => {
+const MyTextInput = ({
+  label,
+  icon,
+  isPassword,
+  togglePasswordVisibility,
+  ...props
+}) => {
   return (
     <View>
       <SignupInputLabel>{label}</SignupInputLabel>
       <SignupInputContainer>
         <Ionicons name={icon} size={24} color="#9CA3AF" />
-        <SignupTextInputStyled {...props} secureTextEntry={isPassword} />
-        {isPassword && <Ionicons name="eye-off" size={24} color="#9CA3AF" />}
+        <SignupTextInputStyled {...props} />
+        {isPassword && (
+          <TouchableOpacity onPress={togglePasswordVisibility}>
+            <Ionicons
+              name={props.secureTextEntry ? "eye-off" : "eye"} // שינוי בין עין פתוחה לסגורה
+              size={24}
+              color="#9CA3AF"
+            />
+          </TouchableOpacity>
+        )}
       </SignupInputContainer>
     </View>
   );
