@@ -3,6 +3,7 @@ import { StatusBar } from "expo-status-bar";
 import { View, TouchableOpacity, ScrollView } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import {
   SignupStyledContainer,
   SignupInnerContainer,
@@ -67,7 +68,7 @@ const Signup = ({ navigation }) => {
   const signUp = async () => {
     try {
       console.log(JSON.stringify(formData));
-      const response = await fetch("http://172.25.18.108:3000/user/signup", {
+      const response = await fetch("http://172.25.18.107:3000/user/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -80,8 +81,9 @@ const Signup = ({ navigation }) => {
       if (contentType && contentType.includes("application/json")) {
         const result = await response.json();
 
-        if (result.status === "SUCCESS") {
+        if (response.ok) {
           console.log("Signup successful:", result.message);
+          await AsyncStorage.setItem("token", result.token);
           // מעביר את השם ושם המשפחה
           navigation.navigate("Welcome", {
             firstName: formData.firstName,

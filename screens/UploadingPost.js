@@ -145,7 +145,7 @@ const UploadingPost = ({ navigation }) => {
     console.log("Post data:", postData);
 
     try {
-      const response = await fetch("http://172.25.18.108:3000/api/posts", {
+      const response = await fetch("http://172.25.18.107:3000/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

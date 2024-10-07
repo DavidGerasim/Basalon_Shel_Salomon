@@ -28,31 +28,49 @@ const Login = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const normalizedEmail = email.toLowerCase();
+      console.log("Logging in with email:", normalizedEmail); // Log email
 
-      const response = await fetch("http://172.25.18.108:3000/user/signin", {
+      const requestBody = JSON.stringify({ email: normalizedEmail, password });
+      console.log("Request Body:", requestBody); // Log the request body
+
+      const response = await fetch("http://172.25.18.107:3000/user/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ email: normalizedEmail, password }),
+        body: requestBody,
       });
 
-      const textResponse = await response.text(); // קריאת התגובה כטקסט
-      console.log("Raw response:", textResponse); // הדפסת התגובה הגולמית
+      const textResponse = await response.text(); // Read response as text
+      console.log("Raw response:", textResponse); // Print raw response
 
-      const data = JSON.parse(textResponse); // פענוח התגובה כ-JSON
+      const data = JSON.parse(textResponse); // Parse JSON
       console.log("Response data:", data);
 
-      if (data.status === "SUCCESS") {
-        console.log("User logged in successfully:", data);
-        await AsyncStorage.setItem("token", data.token);
+      if (response.ok) {
+        // Check if the response status is OK (status code 200-299)
+        if (data.message === "Signin successful") {
+          console.log("User logged in successfully:", data);
+          await AsyncStorage.setItem("token", data.token);
 
-        navigation.navigate("Welcome", {
-          firstName: data.firstName,
-          lastName: data.lastName,
-        });
+          // Log before navigating to Welcome
+          console.log("Navigating to Welcome screen with:", {
+            firstName: data.firstName,
+            lastName: data.lastName,
+          });
+
+          // Navigate to Welcome
+          navigation.navigate("Welcome", {
+            firstName: data.firstName,
+            lastName: data.lastName,
+          });
+        } else {
+          console.error("Login failed with message:", data.message); // Log the failure message
+          Alert.alert("Login Error", data.message);
+        }
       } else {
-        Alert.alert("Login Error", data.message);
+        console.error("Response not OK:", response.status); // Log if the response is not OK
+        Alert.alert("Login Error", "Server error, please try again later.");
       }
     } catch (error) {
       console.error("Error during login: ", error);

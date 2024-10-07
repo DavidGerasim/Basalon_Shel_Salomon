@@ -30,7 +30,7 @@ const Welcome = ({ navigation }) => {
         const token = await AsyncStorage.getItem("token");
         console.log("Token:", token); // לוודא שהטוקן נכון
 
-        const response = await fetch("http://172.25.18.108:3000/user/profile", {
+        const response = await fetch("http://172.25.18.107:3000/user/profile", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`, // וודא שהכותרת נכונה
