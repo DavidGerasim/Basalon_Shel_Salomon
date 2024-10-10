@@ -230,12 +230,41 @@ export const SettingsAvatar = styled(Image)`
   border-radius: 30px;
 `;
 
-export const SettingsSubTitle = styled(Text)`
+export const ModalSettingsContainer = styled(View)`
+  flex: 1;
+  justify-content: center;
+  align-items: center;
+  background-color: rgba(0, 0, 0, 0.5);
+`;
+
+export const ModalContent = styled(View)`
+  width: 80%;
+  background-color: white;
+  padding: 20px;
+  border-radius: 10px;
+  align-items: center;
+`;
+
+export const ModalTitle = styled(Text)`
   font-size: 18px;
-  margin-top: 10px;
-  letter-spacing: 1px;
-  font-weight: normal;
-  color: #bbb;
+  margin-bottom: 10px;
+`;
+
+export const ModalInput = styled(TextInput)`
+  border-width: 1px;
+  border-color: #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  width: 100%;
+  margin-bottom: 20px;
+`;
+
+export const ModalButton = styled(TouchableOpacity)`
+  background-color: #007bff;
+  padding: 10px;
+  border-radius: 5px;
+  width: 100%;
+  align-items: center;
 `;
 
 // Welcome ------------------------------------------------------------------
@@ -283,7 +312,7 @@ export const WelcomeSubTitle = styled(Text)`
 
 export const WelcomeChoosinglTitle = styled(Text)`
   font-size: 18px;
-  margin-top: 10px;
+  margin-top: 150px;
   letter-spacing: 1px;
   font-weight: bold;
   color: #bbb;
@@ -305,13 +334,6 @@ export const WelcomeButtonText = styled(Text)`
   font-size: 24px;
 `;
 
-export const WelcomeLine = styled(View)`
-  height: 1px;
-  width: 100%;
-  background-color: #9ca3af;
-  margin-vertical: 5px;
-`;
-
 export const WelcomeAvatar = styled(Image)`
   width: 100px;
   height: 100px;
@@ -322,7 +344,7 @@ export const ButtonContainer = styled(View)`
   flex-direction: row;
   justify-content: center;
   width: 100%;
-  margin-top: 10px;
+  margin-top: 15px;
   gap: 60px;
   padding-right: 10px;
 `;

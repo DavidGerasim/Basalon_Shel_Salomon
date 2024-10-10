@@ -24,7 +24,7 @@ const Map = ({ navigation, addNotification }) => {
   useEffect(() => {
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://172.25.18.107:3000/api/posts");
+        const response = await axios.get("http://10.0.0.9:3000/api/posts");
         console.log("Response data:", response.data);
 
         const currentTime = new Date();
@@ -56,7 +56,7 @@ const Map = ({ navigation, addNotification }) => {
     fetchPosts();
 
     // Setting up WebSocket connection with Socket.IO
-    const socket = io("http://172.25.18.107:3000");
+    const socket = io("http://10.0.0.9:3000");
 
     // Listen for "postUpdated" events
     socket.on("postUpdated", (change) => {
@@ -94,7 +94,7 @@ const Map = ({ navigation, addNotification }) => {
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://172.25.18.107:3000/api/posts/${postId}`);
+      await axios.delete(`http://10.0.0.9:3000/api/posts/${postId}`);
       console.log(`Post with ID ${postId} deleted successfully`);
     } catch (error) {
       console.error("Error deleting post:", error);
@@ -153,7 +153,7 @@ const Map = ({ navigation, addNotification }) => {
 
     try {
       const response = await axios.put(
-        `http://172.25.18.107:3000/api/posts/${selectedPost._id}`,
+        `http://10.0.0.9:3000/api/posts/${selectedPost._id}`,
         {
           musicians: updatedMusicians,
           friends: updatedFriends,
@@ -270,6 +270,8 @@ const Map = ({ navigation, addNotification }) => {
 
               <Text>Musicians: {selectedPost?.musicians}</Text>
               <Text>Friends: {selectedPost?.friends}</Text>
+              <Text>Instruments: {selectedPost?.instruments}</Text>
+              <Text>Comment: {selectedPost?.comment}</Text>
 
               <TextInput
                 placeholder="Enter number of musicians"

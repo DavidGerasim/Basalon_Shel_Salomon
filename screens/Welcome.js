@@ -11,7 +11,6 @@ import {
   WelcomeStyledFormArea,
   WelcomeStyledButton,
   WelcomeButtonText,
-  WelcomeLine,
   WelcomeContainer,
   WelcomeAvatar,
   ButtonContainer,
@@ -30,7 +29,7 @@ const Welcome = ({ navigation }) => {
         const token = await AsyncStorage.getItem("token");
         console.log("Token:", token); // לוודא שהטוקן נכון
 
-        const response = await fetch("http://172.25.18.107:3000/user/profile", {
+        const response = await fetch("http://10.0.0.9:3000/user/profile", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`, // וודא שהכותרת נכונה
@@ -114,27 +113,24 @@ const Welcome = ({ navigation }) => {
           {userData.firstName} {userData.lastName}
         </WelcomeSubTitle>
 
-        <WelcomeChoosinglTitle>
-          Where would you like to go?
-        </WelcomeChoosinglTitle>
+        <WelcomeChoosinglTitle>Choose</WelcomeChoosinglTitle>
 
         <WelcomeStyledFormArea>
           <ButtonContainer>
             <WelcomeStyledButton
               style={{ backgroundColor: "#8c4e79" }}
-              onPress={() => navigation.navigate("UploadPost")}
+              onPress={() => navigation.navigate("UploadingPost")}
             >
-              <WelcomeButtonText>Upload a post</WelcomeButtonText>
+              <WelcomeButtonText>Host</WelcomeButtonText>
             </WelcomeStyledButton>
             <WelcomeStyledButton
               style={{ backgroundColor: "#8c4e79" }}
               onPress={() => navigation.navigate("Map")}
             >
-              <WelcomeButtonText>Map</WelcomeButtonText>
+              <WelcomeButtonText>Guest</WelcomeButtonText>
             </WelcomeStyledButton>
           </ButtonContainer>
         </WelcomeStyledFormArea>
-        <WelcomeLine />
       </WelcomeInnerContainer>
     </>
   );

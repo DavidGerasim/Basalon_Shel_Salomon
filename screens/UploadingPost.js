@@ -7,6 +7,7 @@ import {
   ScrollView,
   Alert,
   Platform,
+  Modal,
 } from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import DateTimePicker from "@react-native-community/datetimepicker";
@@ -49,12 +50,12 @@ const UploadingPost = ({ navigation }) => {
     comment: "",
   });
 
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
+
   const handleInputChange = (field, value) => {
-    // המרה למספר
     const numberValue = parseInt(value, 10);
 
     if (field === "musicians") {
-      // בדוק אם הערך הוא מספר חיובי שלם
       if (value === "" || (numberValue > 0 && Number.isInteger(numberValue))) {
         setFormData((prevFormData) => ({
           ...prevFormData,
@@ -62,14 +63,12 @@ const UploadingPost = ({ navigation }) => {
         }));
         console.log(`Input changed - ${field}: ${value}`);
       } else {
-        // הצג התראה מיידית על קלט לא חוקי
         Alert.alert(
           "Invalid Input",
           "Please enter a positive whole number for musicians."
         );
       }
     } else if (field === "friends") {
-      // בדוק אם הערך הוא מספר חיובי שלם
       if (value === "" || (numberValue >= 0 && Number.isInteger(numberValue))) {
         setFormData((prevFormData) => ({
           ...prevFormData,
@@ -77,14 +76,12 @@ const UploadingPost = ({ navigation }) => {
         }));
         console.log(`Input changed - ${field}: ${value}`);
       } else {
-        // הצג התראה מיידית על קלט לא חוקי
         Alert.alert(
           "Invalid Input",
           "Please enter a non-negative whole number for friends."
         );
       }
     } else {
-      // עבור שדות אחרים, עדכן כרגיל
       setFormData((prevFormData) => ({
         ...prevFormData,
         [field]: value,
@@ -94,38 +91,34 @@ const UploadingPost = ({ navigation }) => {
   };
 
   const handleLocationChange = async (value) => {
-   handleInputChange("city", value);
- 
-   if (value.length > 2) {
-     try {
-       const response = await axios.get(
-         `https://nominatim.openstreetmap.org/search?q=${value}&format=json&addressdetails=1`
-       );
-       // טען את התוצאות מה-Nominatim
-       const suggestions = response.data.map((location) => ({
-         display_name: location.display_name,
-         // תוכל להוסיף יותר פרטים אם צריך
-       }));
- 
-       setLocationSuggestions(suggestions);
-       setShowSuggestions(true);
-       console.log("Location suggestions fetched:", suggestions);
-     } catch (error) {
-       console.error("Error fetching location suggestions: ", error);
-     }
-   } else {
-     setLocationSuggestions([]);
-     setShowSuggestions(false);
-   }
- };
- 
+    handleInputChange("city", value);
 
- const handleLocationSelect = (address) => {
-   handleInputChange("city", address.display_name); // השתמש בשם התצוגה
-   setShowSuggestions(false);
-   console.log(`Location selected: ${address.display_name}`);
- };
- 
+    if (value.length > 2) {
+      try {
+        const response = await axios.get(
+          `https://nominatim.openstreetmap.org/search?q=${value}&format=json&addressdetails=1`
+        );
+        const suggestions = response.data.map((location) => ({
+          display_name: location.display_name,
+        }));
+
+        setLocationSuggestions(suggestions);
+        setShowSuggestions(true);
+        console.log("Location suggestions fetched:", suggestions);
+      } catch (error) {
+        console.error("Error fetching location suggestions: ", error);
+      }
+    } else {
+      setLocationSuggestions([]);
+      setShowSuggestions(false);
+    }
+  };
+
+  const handleLocationSelect = (address) => {
+    handleInputChange("city", address.display_name);
+    setShowSuggestions(false);
+    console.log(`Location selected: ${address.display_name}`);
+  };
 
   const handlePost = async () => {
     setLoading(true);
@@ -145,7 +138,7 @@ const UploadingPost = ({ navigation }) => {
     console.log("Post data:", postData);
 
     try {
-      const response = await fetch("http://172.25.18.107:3000/api/posts", {
+      const response = await fetch("http://10.0.0.9:3000/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -165,6 +158,13 @@ const UploadingPost = ({ navigation }) => {
           comment: "",
         });
         console.log("Post uploaded successfully!");
+
+        // Show success message for 3 seconds
+        setShowSuccessMessage(true);
+        setTimeout(() => {
+          setShowSuccessMessage(false);
+          navigation.navigate("Welcome"); // Navigate back to the welcome screen
+        }, 3000);
       } else {
         Alert.alert(
           "Error",
@@ -184,12 +184,10 @@ const UploadingPost = ({ navigation }) => {
     const currentTime = selectedTime || beginningTime;
     setShowBeginningPicker(false);
 
-    // צור תאריך חדש שמשלב את התאריך הנבחר עם הזמן החדש
     const combinedBeginningTime = new Date(selectedDate);
     combinedBeginningTime.setHours(currentTime.getHours());
     combinedBeginningTime.setMinutes(currentTime.getMinutes());
 
-    // Check if the combined time is after the current time
     if (combinedBeginningTime > new Date()) {
       setBeginningTime(currentTime);
       console.log("Beginning time changed:", currentTime);
@@ -202,7 +200,6 @@ const UploadingPost = ({ navigation }) => {
     const currentTime = selectedTime || endTime;
     setShowEndPicker(false);
 
-    // Check if the selected time is after the beginning time
     if (currentTime > beginningTime) {
       setEndTime(currentTime);
       console.log("End time changed:", currentTime);
@@ -264,7 +261,7 @@ const UploadingPost = ({ navigation }) => {
             <LocationInput
               address={formData.city}
               onLocationChange={(value) => handleLocationChange(value)}
-              onLocationSelect={handleLocationSelect} // הוספת הפונקציה הזו
+              onLocationSelect={handleLocationSelect}
             />
 
             {/* Date Picker Input */}
@@ -308,93 +305,102 @@ const UploadingPost = ({ navigation }) => {
             {/* Musicians Input */}
             <UploadingPostInputLabel>Musicians</UploadingPostInputLabel>
             <MyTextInput
-              placeholder="Choose number of musicians"
-              icon="musical-notes-outline"
+              placeholder="Musicians"
               value={formData.musicians}
-              onChangeText={(text) => handleInputChange("musicians", text)}
+              onChangeText={(value) => handleInputChange("musicians", value)}
               keyboardType="numeric"
             />
 
             {/* Friends Input */}
             <UploadingPostInputLabel>Friends</UploadingPostInputLabel>
             <MyTextInput
-              placeholder="Choose number of friends"
-              icon="person-outline"
+              placeholder="Friends"
               value={formData.friends}
-              onChangeText={(text) => handleInputChange("friends", text)}
+              onChangeText={(value) => handleInputChange("friends", value)}
               keyboardType="numeric"
             />
 
             {/* Instruments Input */}
             <UploadingPostInputLabel>Instruments</UploadingPostInputLabel>
             <MyTextInput
-              placeholder="What do you have?"
-              icon="musical-notes-outline"
+              placeholder="Instruments"
               value={formData.instruments}
-              onChangeText={(text) => handleInputChange("instruments", text)}
+              onChangeText={(value) => handleInputChange("instruments", value)}
             />
 
             {/* Comment Input */}
             <UploadingPostInputLabel>Comment</UploadingPostInputLabel>
             <MyTextInput
-              placeholder="If you want..."
-              icon="chatbox-outline"
+              placeholder="Comment"
               value={formData.comment}
-              onChangeText={(text) => handleInputChange("comment", text)}
+              onChangeText={(value) => handleInputChange("comment", value)}
+              multiline={true}
             />
 
-            {/* Post Button */}
+            {/* Submit Button */}
             <UploadingPostStyledButton
               onPress={handlePost}
-              disabled={!isFormValid()} // Disable button if form is not valid
-              style={{
-                backgroundColor: isFormValid() ? "#528DD0" : "#B0C4DE", // Change color based on validity
-              }}
+              disabled={loading || !isFormValid()}
             >
               <UploadingPostButtonText>
-                {loading ? "Uploading..." : "Upload Post"}
+                {loading ? "Posting..." : "Post"}
               </UploadingPostButtonText>
             </UploadingPostStyledButton>
-
-            {/* Message Display */}
-            {message ? (
-              <Text style={{ color: "green", marginTop: 10 }}>{message}</Text>
-            ) : null}
           </UploadingPostFormArea>
         </UploadingPostInnerContainer>
       </ScrollView>
 
-      {/* DateTime Picker for Date */}
+      {/* Success Message Modal */}
+      <Modal visible={showSuccessMessage} animationType="slide" transparent>
+        <View
+          style={{
+            flex: 1,
+            justifyContent: "center",
+            alignItems: "center",
+            backgroundColor: "rgba(0,0,0,0.5)",
+          }}
+        >
+          <View
+            style={{
+              backgroundColor: "white",
+              padding: 20,
+              borderRadius: 10,
+              alignItems: "center",
+            }}
+          >
+            <Text style={{ fontSize: 18, fontWeight: "bold" }}>
+              Post uploaded successfully!
+            </Text>
+          </View>
+        </View>
+      </Modal>
+
       {showDatePicker && (
         <DateTimePicker
-          testID="dateTimePicker"
           value={selectedDate}
           mode="date"
           display="default"
           onChange={onDateChange}
-          minimumDate={new Date()} // הגדרת תאריך מקסימלי להיום
         />
       )}
 
-      {/* DateTime Picker for Beginning Time */}
       {showBeginningPicker && (
         <DateTimePicker
-          testID="dateTimePicker"
           value={beginningTime}
           mode="time"
           display="default"
           onChange={onBeginningTimeChange}
+          is24Hour={true}
         />
       )}
 
-      {/* DateTime Picker for End Time */}
       {showEndPicker && (
         <DateTimePicker
-          testID="dateTimePicker"
           value={endTime}
           mode="time"
           display="default"
           onChange={onEndTimeChange}
+          is24Hour={true}
         />
       )}
     </UploadingPostStyledContainer>

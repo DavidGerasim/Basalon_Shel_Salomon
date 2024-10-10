@@ -1,6 +1,12 @@
 import React, { useState } from "react";
 import { StatusBar } from "expo-status-bar";
-import { View, TouchableOpacity, ScrollView } from "react-native";
+import {
+  View,
+  TouchableOpacity,
+  ScrollView,
+  Text,
+  StyleSheet,
+} from "react-native";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -35,6 +41,7 @@ const Signup = ({ navigation }) => {
 
   const [showPassword, setShowPassword] = useState(false); // מצב לסיסמה
   const [showConfirmPassword, setShowConfirmPassword] = useState(false); // מצב לאישור הסיסמה
+  const [errorMessage, setErrorMessage] = useState(""); // state להודעת השגיאה
 
   const handleInputChange = (field, value) => {
     setFormData({ ...formData, [field]: value });
@@ -68,7 +75,7 @@ const Signup = ({ navigation }) => {
   const signUp = async () => {
     try {
       console.log(JSON.stringify(formData));
-      const response = await fetch("http://172.25.18.107:3000/user/signup", {
+      const response = await fetch("http://10.0.0.9:3000/user/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -90,14 +97,17 @@ const Signup = ({ navigation }) => {
             lastName: formData.lastName,
           });
         } else {
-          console.error("Signup failed:", result.message);
+          setErrorMessage(result.message); // הגדרת הודעת השגיאה מהשרת
+          setTimeout(() => setErrorMessage(""), 3000); // מחיקה לאחר 3 שניות
         }
       } else {
         const text = await response.text();
-        console.error("Unexpected response:", text);
+        setErrorMessage("Unexpected response: " + text);
+        setTimeout(() => setErrorMessage(""), 3000); // מחיקה לאחר 3 שניות
       }
     } catch (error) {
-      console.error("Error during signup:", error);
+      setErrorMessage("Error during signup: " + error.message);
+      setTimeout(() => setErrorMessage(""), 3000); // מחיקה לאחר 3 שניות
     }
   };
 
@@ -115,6 +125,14 @@ const Signup = ({ navigation }) => {
         <Ionicons name="arrow-back" size={24} color="#ffffff" />
       </TouchableOpacity>
       <SignupPageTitle style={{ color: "#8c4e79" }}>Sign Up</SignupPageTitle>
+
+      {/* הודעת השגיאה */}
+      {errorMessage ? (
+        <View style={styles.errorContainer}>
+          <Text style={styles.errorText}>{errorMessage}</Text>
+        </View>
+      ) : null}
+
       <ScrollView>
         <SignupInnerContainer>
           <SignupFormArea>
@@ -222,5 +240,26 @@ const MyTextInput = ({
     </View>
   );
 };
+
+// סגנון להודעת השגיאה
+const styles = StyleSheet.create({
+  errorContainer: {
+    position: "absolute",
+    top: 350,
+    left: 0,
+    right: 0,
+    alignItems: "center",
+    zIndex: 1,
+  },
+  errorText: {
+    backgroundColor: "red",
+    color: "white",
+    fontSize: 24,
+    fontWeight: "bold",
+    padding: 10,
+    borderRadius: 5,
+    textAlign: "center",
+  },
+});
 
 export default Signup;
