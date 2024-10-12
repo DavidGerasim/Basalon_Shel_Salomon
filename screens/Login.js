@@ -28,12 +28,10 @@ const Login = ({ navigation }) => {
   const handleLogin = async () => {
     try {
       const normalizedEmail = email.toLowerCase();
-      console.log("Logging in with email:", normalizedEmail); // Log email
 
       const requestBody = JSON.stringify({ email: normalizedEmail, password });
-      console.log("Request Body:", requestBody); // Log the request body
 
-      const response = await fetch("http://10.0.0.9:3000/user/signin", {
+      const response = await fetch("http://172.25.18.99:3000/user/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -42,10 +40,8 @@ const Login = ({ navigation }) => {
       });
 
       const textResponse = await response.text(); // Read response as text
-      console.log("Raw response:", textResponse); // Print raw response
 
       const data = JSON.parse(textResponse); // Parse JSON
-      console.log("Response data:", data);
 
       if (response.ok) {
         // Check if the response status is OK (status code 200-299)

@@ -138,7 +138,7 @@ const UploadingPost = ({ navigation }) => {
     console.log("Post data:", postData);
 
     try {
-      const response = await fetch("http://10.0.0.9:3000/api/posts", {
+      const response = await fetch("http://172.25.18.99:3000/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -341,6 +341,9 @@ const UploadingPost = ({ navigation }) => {
             <UploadingPostStyledButton
               onPress={handlePost}
               disabled={loading || !isFormValid()}
+              style={{
+                backgroundColor: loading || !isFormValid() ? "grey" : "blue", // צבע אפור אם הכפתור לא פעיל
+              }}
             >
               <UploadingPostButtonText>
                 {loading ? "Posting..." : "Post"}
@@ -381,6 +384,7 @@ const UploadingPost = ({ navigation }) => {
           mode="date"
           display="default"
           onChange={onDateChange}
+          minimumDate={new Date()}
         />
       )}
 

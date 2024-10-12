@@ -7,34 +7,75 @@ import {
   Text,
   TextInput,
   TouchableWithoutFeedback,
+  Alert,
 } from "react-native";
 import MapView, { Marker } from "react-native-maps";
 import { Ionicons } from "@expo/vector-icons";
 import axios from "axios";
 import { mapStyles } from "./../components/styles";
 import io from "socket.io-client";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 
 const Map = ({ navigation, addNotification }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState(null);
-  const [number1, setNumber1] = useState(""); // State for first number input
-  const [number2, setNumber2] = useState(""); // State for second number input
+  const [number1, setNumber1] = useState("");
+  const [number2, setNumber2] = useState("");
+  const [userData, setUserData] = useState({
+    userId: "",
+  });
 
   useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+
+        const response = await fetch("http://172.25.18.99:3000/user/profile", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        console.log("User data response_1:", data);
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch user data. Status: ${response.status}`
+          );
+        }
+
+        if (data && data.userId) {
+          setUserData({
+            userId: data.userId,
+          });
+          console.log("User userId set_4:", data.userId);
+        } else {
+          Alert.alert("Authentication Error", "You are not logged in.");
+          navigation.navigate("Login");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        Alert.alert("Error", "An error occurred while fetching user data.");
+        navigation.navigate("Login");
+      }
+    };
+
+    fetchUserData();
+
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://10.0.0.9:3000/api/posts");
-        console.log("Response data:", response.data);
+        const response = await axios.get("http://172.25.18.99:3000/api/posts");
 
         const currentTime = new Date();
-
-        // Check for valid posts
         const updatedPosts = response.data.filter((post) => {
           const eventDate = new Date(post.date);
           const postStartTime = new Date(post.beginningTime);
 
-          // Check conditions: musicians > 0, eventDate >= currentDate, and valid beginningTime
           return (
             post.musicians > 0 &&
             eventDate >= new Date().setHours(0, 0, 0, 0) &&
@@ -52,17 +93,10 @@ const Map = ({ navigation, addNotification }) => {
       }
     };
 
-    // Initial fetch of posts
     fetchPosts();
 
-    // Setting up WebSocket connection with Socket.IO
-    const socket = io("http://10.0.0.9:3000");
-
-    // Listen for "postUpdated" events
+    const socket = io("http://172.25.18.99:3000");
     socket.on("postUpdated", (change) => {
-      console.log("Post updated:", change);
-
-      // Depending on the change type (insert, update, delete), update the posts state accordingly
       switch (change.operationType) {
         case "insert":
           setPosts((prevPosts) => [...prevPosts, change.fullDocument]);
@@ -86,51 +120,43 @@ const Map = ({ navigation, addNotification }) => {
       }
     });
 
-    // Clean up the connection when the component unmounts
     return () => {
       socket.disconnect();
     };
-  }, []);
+  }, [navigation]);
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://10.0.0.9:3000/api/posts/${postId}`);
-      console.log(`Post with ID ${postId} deleted successfully`);
-    } catch (error) {
-      console.error("Error deleting post:", error);
-    }
+      await axios.delete(`http://172.25.18.99:3000/api/posts/${postId}`);
+    } catch (error) {}
   };
 
   const handleMarkerPress = (post) => {
     setSelectedPost(post);
-    console.log("Selected post:", post); // לוג הפוסט שנבחר
   };
 
   const handleCloseModal = () => {
     setSelectedPost(null);
-    setNumber1(""); // Clear input on close
-    setNumber2(""); // Clear input on close
+    setNumber1("");
+    setNumber2("");
   };
 
   const handleNumberInputChange1 = (text) => {
-    // Allow only numeric input
     if (/^\d*$/.test(text)) {
       setNumber1(text);
     }
   };
 
   const handleNumberInputChange2 = (text) => {
-    // Allow only numeric input
     if (/^\d*$/.test(text)) {
       setNumber2(text);
     }
   };
 
-  const isSendButtonEnabled = number1 !== "" && number2 !== ""; // Check if both inputs have values
+  const isSendButtonEnabled = number1 !== "" && number2 !== "";
 
   const updatePost = async () => {
     if (!selectedPost) {
-      console.error("No post selected"); // לוג אם אין פוסט נבחר
       return;
     }
 
@@ -143,26 +169,38 @@ const Map = ({ navigation, addNotification }) => {
       selectedPost.friends - (parseInt(number2) || 0)
     );
 
-    console.log("Updating post with ID:", selectedPost.id); // לוג של ה-ID
-    console.log(
-      "Musicians to update:",
-      updatedMusicians,
-      "Friends to update:",
-      updatedFriends
-    );
+    const meetingData = {
+      userId: userData.userId,
+      city: selectedPost.city,
+      latitude: parseFloat(selectedPost.city.latitude),
+      longitude: parseFloat(selectedPost.city.longitude),
+      date: selectedPost.date,
+      beginningTime: selectedPost.beginningTime,
+      endTime: selectedPost.endTime,
+      musicians: updatedMusicians,
+      friends: updatedFriends,
+      instruments: selectedPost.instruments,
+      comment: selectedPost.comment,
+    };
+
+    console.log("Meeting data to be sent_5:", meetingData); // לוג של נתוני הפגישה
 
     try {
-      const response = await axios.put(
-        `http://10.0.0.9:3000/api/posts/${selectedPost._id}`,
+      await axios.post("http://172.25.18.99:3000/api/meetings", meetingData);
+      console.log("Meeting data sent successfully."); // לוג של הצלחה במשלוח נתוני הפגישה
+      await axios.put(
+        `http://172.25.18.99:3000/api/posts/${selectedPost._id}`,
         {
           musicians: updatedMusicians,
           friends: updatedFriends,
         }
       );
 
-      console.log("Response from server:", response.data); // לוג תגובה מהשרת
+      console.log("Updated post:", {
+        musicians: updatedMusicians,
+        friends: updatedFriends,
+      }); // לוג של הפוסט המעודכן
 
-      // Update local state
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
           post._id === selectedPost._id
@@ -171,23 +209,17 @@ const Map = ({ navigation, addNotification }) => {
         )
       );
 
-      console.log(
-        "Post updated successfully:",
-        updatedMusicians,
-        updatedFriends
-      );
-
-      // Create a notification
       addNotification(
         `Updated post for ${selectedPost.city.description}: ${number1} musicians and ${number2} friends`
       );
 
-      handleCloseModal(); // סגור את המודל אחרי הלחיצה על "שלח"
+      handleCloseModal();
     } catch (error) {
-      console.error(
-        "Error updating post:",
-        error.response?.data || error.message
-      ); // הוסף לוג של השגיאה
+      console.error("Error updating post:", error);
+    }
+    if (error.response) {
+      console.error("Error details:", error.response.data); // לוג של פרטי השגיאה
+      console.error("Error status:", error.response.status); // לוג של הסטטוס של השגיאה
     }
   };
 

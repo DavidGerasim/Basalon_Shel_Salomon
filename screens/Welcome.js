@@ -11,7 +11,6 @@ import {
   WelcomeStyledFormArea,
   WelcomeStyledButton,
   WelcomeButtonText,
-  WelcomeContainer,
   WelcomeAvatar,
   ButtonContainer,
   WelcomeImageContainer,
@@ -27,9 +26,8 @@ const Welcome = ({ navigation }) => {
     const fetchUserData = async () => {
       try {
         const token = await AsyncStorage.getItem("token");
-        console.log("Token:", token); // לוודא שהטוקן נכון
 
-        const response = await fetch("http://10.0.0.9:3000/user/profile", {
+        const response = await fetch("http://172.25.18.99:3000/user/profile", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`, // וודא שהכותרת נכונה
@@ -37,9 +35,7 @@ const Welcome = ({ navigation }) => {
           },
         });
 
-        console.log("Response status:", response.status); // בדיקת קוד הסטטוס
         const responseText = await response.text();
-        console.log("Raw response text:", responseText); // הצגת התשובה המלאה מהשרת
 
         if (!response.ok) {
           throw new Error(
