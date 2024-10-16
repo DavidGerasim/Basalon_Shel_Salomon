@@ -31,7 +31,7 @@ const Map = ({ navigation, addNotification }) => {
       try {
         const token = await AsyncStorage.getItem("token");
 
-        const response = await fetch("http://172.25.18.99:3000/user/profile", {
+        const response = await fetch("http://172.25.18.107:3000/user/profile", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -69,7 +69,7 @@ const Map = ({ navigation, addNotification }) => {
 
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://172.25.18.99:3000/api/posts");
+        const response = await axios.get("http://172.25.18.107:3000/api/posts");
 
         const currentTime = new Date();
         const updatedPosts = response.data.filter((post) => {
@@ -95,7 +95,7 @@ const Map = ({ navigation, addNotification }) => {
 
     fetchPosts();
 
-    const socket = io("http://172.25.18.99:3000");
+    const socket = io("http://172.25.18.107:3000");
     socket.on("postUpdated", (change) => {
       switch (change.operationType) {
         case "insert":
@@ -127,7 +127,7 @@ const Map = ({ navigation, addNotification }) => {
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://172.25.18.99:3000/api/posts/${postId}`);
+      await axios.delete(`http://172.25.18.107:3000/api/posts/${postId}`);
     } catch (error) {}
   };
 
@@ -186,10 +186,10 @@ const Map = ({ navigation, addNotification }) => {
     console.log("Meeting data to be sent_5:", meetingData); // לוג של נתוני הפגישה
 
     try {
-      await axios.post("http://172.25.18.99:3000/api/meetings", meetingData);
+      await axios.post("http://172.25.18.107:3000/api/meetings", meetingData);
       console.log("Meeting data sent successfully."); // לוג של הצלחה במשלוח נתוני הפגישה
       await axios.put(
-        `http://172.25.18.99:3000/api/posts/${selectedPost._id}`,
+        `http://172.25.18.107:3000/api/posts/${selectedPost._id}`,
         {
           musicians: updatedMusicians,
           friends: updatedFriends,

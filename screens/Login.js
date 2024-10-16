@@ -31,7 +31,7 @@ const Login = ({ navigation }) => {
 
       const requestBody = JSON.stringify({ email: normalizedEmail, password });
 
-      const response = await fetch("http://172.25.18.99:3000/user/signin", {
+      const response = await fetch("http://172.25.18.107:3000/user/signin", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

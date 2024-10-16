@@ -75,7 +75,7 @@ const Signup = ({ navigation }) => {
   const signUp = async () => {
     try {
       console.log(JSON.stringify(formData));
-      const response = await fetch("http://10.0.0.9:3000/user/signup", {
+      const response = await fetch("http://172.25.18.107:3000/user/signup", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
