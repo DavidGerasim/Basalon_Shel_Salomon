@@ -704,7 +704,7 @@ export const NotificationPageTitle = styled(Text)`
   max-width: 60%;
 `;
 
-export const NotificationStyledFormArea = styled(View)`
+export const ListtyledFormArea = styled(View)`
   width: 100%;
   margin-top: 80px; /* נשאיר מרווח אחרי הכותרת */
 `;

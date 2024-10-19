@@ -42,7 +42,7 @@ const Settings = ({ navigation }) => {
         const token = await AsyncStorage.getItem("token");
         console.log("Token:", token); // Check token
 
-        const response = await fetch("http://172.25.18.107:3000/user/profile", {
+        const response = await fetch("http://10.0.0.9:3000/user/profile", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -74,7 +74,7 @@ const Settings = ({ navigation }) => {
   const updateUserDetails = async (field, value) => {
     try {
       const token = await AsyncStorage.getItem("token"); // קבלת הטוקן מהאחסון המקומי
-      const response = await fetch(`http://172.25.18.107:3000/user/profile`, {
+      const response = await fetch(`http://10.0.0.9:3000/user/profile`, {
         method: "PUT",
         headers: {
           Authorization: `Bearer ${token}`, // הוספת טוקן לאימות

@@ -27,10 +27,10 @@ const Welcome = ({ navigation }) => {
       try {
         const token = await AsyncStorage.getItem("token");
 
-        const response = await fetch("http://172.25.18.107:3000/user/profile", {
+        const response = await fetch("http://10.0.0.9:3000/user/profile", {
           method: "GET",
           headers: {
-            Authorization: `Bearer ${token}`, // וודא שהכותרת נכונה
+            Authorization: `Bearer ${token}`,
             "Content-Type": "application/json",
           },
         });
@@ -76,7 +76,7 @@ const Welcome = ({ navigation }) => {
             }}
             style={{ position: "absolute", top: 40, right: 75 }}
           >
-            <Ionicons name="notifications-outline" size={30} color="#ffffff" />
+            <Ionicons name="list-outline" size={30} color="#ffffff" />
           </TouchableOpacity>
 
           <TouchableOpacity

@@ -16,7 +16,7 @@ import { mapStyles } from "./../components/styles";
 import io from "socket.io-client";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
-const Map = ({ navigation, addNotification }) => {
+const Map = ({ navigation }) => {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [selectedPost, setSelectedPost] = useState(null);
@@ -31,7 +31,7 @@ const Map = ({ navigation, addNotification }) => {
       try {
         const token = await AsyncStorage.getItem("token");
 
-        const response = await fetch("http://172.25.18.107:3000/user/profile", {
+        const response = await fetch("http://10.0.0.9:3000/user/profile", {
           method: "GET",
           headers: {
             Authorization: `Bearer ${token}`,
@@ -40,8 +40,6 @@ const Map = ({ navigation, addNotification }) => {
         });
 
         const data = await response.json();
-
-        console.log("User data response_1:", data);
 
         if (!response.ok) {
           throw new Error(
@@ -53,7 +51,6 @@ const Map = ({ navigation, addNotification }) => {
           setUserData({
             userId: data.userId,
           });
-          console.log("User userId set_4:", data.userId);
         } else {
           Alert.alert("Authentication Error", "You are not logged in.");
           navigation.navigate("Login");
@@ -69,7 +66,7 @@ const Map = ({ navigation, addNotification }) => {
 
     const fetchPosts = async () => {
       try {
-        const response = await axios.get("http://172.25.18.107:3000/api/posts");
+        const response = await axios.get("http://10.0.0.9:3000/api/posts");
 
         const currentTime = new Date();
         const updatedPosts = response.data.filter((post) => {
@@ -95,7 +92,7 @@ const Map = ({ navigation, addNotification }) => {
 
     fetchPosts();
 
-    const socket = io("http://172.25.18.107:3000");
+    const socket = io("http://10.0.0.9:3000");
     socket.on("postUpdated", (change) => {
       switch (change.operationType) {
         case "insert":
@@ -127,7 +124,7 @@ const Map = ({ navigation, addNotification }) => {
 
   const deletePost = async (postId) => {
     try {
-      await axios.delete(`http://172.25.18.107:3000/api/posts/${postId}`);
+      await axios.delete(`http://10.0.0.9:3000/api/posts/${postId}`);
     } catch (error) {}
   };
 
@@ -183,23 +180,12 @@ const Map = ({ navigation, addNotification }) => {
       comment: selectedPost.comment,
     };
 
-    console.log("Meeting data to be sent_5:", meetingData); // לוג של נתוני הפגישה
-
     try {
-      await axios.post("http://172.25.18.107:3000/api/meetings", meetingData);
-      console.log("Meeting data sent successfully."); // לוג של הצלחה במשלוח נתוני הפגישה
-      await axios.put(
-        `http://172.25.18.107:3000/api/posts/${selectedPost._id}`,
-        {
-          musicians: updatedMusicians,
-          friends: updatedFriends,
-        }
-      );
-
-      console.log("Updated post:", {
+      await axios.post("http://10.0.0.9:3000/api/meetings", meetingData);
+      await axios.put(`http://10.0.0.9:3000/api/posts/${selectedPost._id}`, {
         musicians: updatedMusicians,
         friends: updatedFriends,
-      }); // לוג של הפוסט המעודכן
+      });
 
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
@@ -209,17 +195,9 @@ const Map = ({ navigation, addNotification }) => {
         )
       );
 
-      addNotification(
-        `Updated post for ${selectedPost.city.description}: ${number1} musicians and ${number2} friends`
-      );
-
       handleCloseModal();
     } catch (error) {
       console.error("Error updating post:", error);
-    }
-    if (error.response) {
-      console.error("Error details:", error.response.data); // לוג של פרטי השגיאה
-      console.error("Error status:", error.response.status); // לוג של הסטטוס של השגיאה
     }
   };
 
@@ -246,12 +224,14 @@ const Map = ({ navigation, addNotification }) => {
           const latitude = parseFloat(post.city.latitude);
           const longitude = parseFloat(post.city.longitude);
 
+          const isCurrentUserPost = post.userId === userData.userId;
+
           if (!isNaN(latitude) && !isNaN(longitude)) {
             return (
               <Marker
                 key={index}
                 coordinate={{ latitude, longitude }}
-                pinColor="red"
+                pinColor={isCurrentUserPost ? "green" : "red"}
                 title={post.city.description}
                 onPress={() => handleMarkerPress(post)}
               />
@@ -323,12 +303,16 @@ const Map = ({ navigation, addNotification }) => {
               <TouchableOpacity
                 onPress={updatePost}
                 disabled={!isSendButtonEnabled}
-                style={{
-                  ...mapStyles.sendButton,
-                  backgroundColor: isSendButtonEnabled ? "blue" : "gray",
-                }}
+                style={[
+                  mapStyles.sendButton,
+                  { opacity: isSendButtonEnabled ? 1 : 0.5 },
+                ]}
               >
                 <Text style={mapStyles.sendButtonText}>Send</Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity onPress={handleCloseModal}>
+                <Text style={mapStyles.closeButton}>Close</Text>
               </TouchableOpacity>
             </View>
           </View>

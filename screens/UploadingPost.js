@@ -1,5 +1,11 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { StatusBar } from "expo-status-bar";
+import { Ionicons } from "@expo/vector-icons";
+import DateTimePicker from "@react-native-community/datetimepicker";
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import axios from "axios";
+import LocationInput from "../components/LocationInputView";
+import MyTextInput from "../components/MyTextInput"; // ודא שכתובת זו נכונה
 import {
   View,
   Text,
@@ -9,8 +15,7 @@ import {
   Platform,
   Modal,
 } from "react-native";
-import { Ionicons } from "@expo/vector-icons";
-import DateTimePicker from "@react-native-community/datetimepicker";
+
 import {
   Header,
   Row,
@@ -24,23 +29,21 @@ import {
   UploadingPostStyledButton,
   UploadingPostButtonText,
 } from "./../components/styles";
-import axios from "axios";
-import LocationInput from "../components/LocationInputView";
-import MyTextInput from "../components/MyTextInput"; // ודא שכתובת זו נכונה
 
 const UploadingPost = ({ navigation }) => {
   const [beginningTime, setBeginningTime] = useState(new Date());
   const [endTime, setEndTime] = useState(new Date());
   const [selectedDate, setSelectedDate] = useState(new Date());
-
   const [showBeginningPicker, setShowBeginningPicker] = useState(false);
   const [showEndPicker, setShowEndPicker] = useState(false);
   const [showDatePicker, setShowDatePicker] = useState(false);
-
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
   const [locationSuggestions, setLocationSuggestions] = useState([]);
   const [showSuggestions, setShowSuggestions] = useState(false);
+  const [userData, setUserData] = useState({
+    userId: "",
+  });
 
   const [formData, setFormData] = useState({
     city: "",
@@ -49,6 +52,45 @@ const UploadingPost = ({ navigation }) => {
     instruments: "",
     comment: "",
   });
+
+  useEffect(() => {
+    const fetchUserData = async () => {
+      try {
+        const token = await AsyncStorage.getItem("token");
+
+        const response = await fetch("http://10.0.0.9:3000/user/profile", {
+          method: "GET",
+          headers: {
+            Authorization: `Bearer ${token}`,
+            "Content-Type": "application/json",
+          },
+        });
+
+        const data = await response.json();
+
+        if (!response.ok) {
+          throw new Error(
+            `Failed to fetch user data. Status: ${response.status}`
+          );
+        }
+
+        if (data && data.userId) {
+          setUserData({
+            userId: data.userId,
+          });
+        } else {
+          Alert.alert("Authentication Error", "You are not logged in.");
+          navigation.navigate("Login");
+        }
+      } catch (error) {
+        console.error("Error fetching user data:", error);
+        Alert.alert("Error", "An error occurred while fetching user data.");
+        navigation.navigate("Login");
+      }
+    };
+
+    fetchUserData();
+  }, [navigation]);
 
   const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
@@ -121,10 +163,15 @@ const UploadingPost = ({ navigation }) => {
   };
 
   const handlePost = async () => {
+    if (!userData.userId) {
+      Alert.alert("Error", "User not logged in.");
+      return;
+    }
     setLoading(true);
     setMessage("");
 
     const postData = {
+      createdBy: userData.userId,
       city: formData.city,
       date: selectedDate.toISOString(),
       beginningTime: beginningTime.toISOString(),
@@ -138,7 +185,7 @@ const UploadingPost = ({ navigation }) => {
     console.log("Post data:", postData);
 
     try {
-      const response = await fetch("http://172.25.18.107:3000/api/posts", {
+      const response = await fetch("http://10.0.0.9:3000/api/posts", {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
