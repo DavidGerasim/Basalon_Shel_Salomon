@@ -5,7 +5,7 @@ import DateTimePicker from "@react-native-community/datetimepicker";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import axios from "axios";
 import LocationInput from "../components/LocationInputView";
-import MyTextInput from "../components/MyTextInput"; // ודא שכתובת זו נכונה
+import MyTextInput from "../components/MyTextInput";
 import {
   View,
   Text,
@@ -180,6 +180,7 @@ const UploadingPost = ({ navigation }) => {
       friends: formData.friends,
       instruments: formData.instruments,
       comment: formData.comment,
+      phoneNumber: userData.phoneNumber,
     };
 
     console.log("Post data:", postData);

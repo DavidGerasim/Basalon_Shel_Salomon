@@ -50,6 +50,7 @@ const Map = ({ navigation }) => {
         if (data && data.userId) {
           setUserData({
             userId: data.userId,
+            phoneNumber: data.phoneNumber,
           });
         } else {
           Alert.alert("Authentication Error", "You are not logged in.");
@@ -154,6 +155,7 @@ const Map = ({ navigation }) => {
 
   const updatePost = async () => {
     if (!selectedPost) {
+      console.log("No post selected for update.");
       return;
     }
 
@@ -168,24 +170,38 @@ const Map = ({ navigation }) => {
 
     const meetingData = {
       userId: userData.userId,
+      postId: selectedPost._id, // הוספת ה-postId כאן
       city: selectedPost.city,
       latitude: parseFloat(selectedPost.city.latitude),
       longitude: parseFloat(selectedPost.city.longitude),
       date: selectedPost.date,
       beginningTime: selectedPost.beginningTime,
       endTime: selectedPost.endTime,
-      musicians: updatedMusicians,
-      friends: updatedFriends,
+      musicians: parseInt(number1) || 0,
+      friends: parseInt(number2) || 0,
       instruments: selectedPost.instruments,
       comment: selectedPost.comment,
+      phoneNumber: selectedPost.phoneNumber,
     };
 
+    console.log("Updating post with ID:", selectedPost._id);
+    console.log("Meeting data to be sent:", meetingData);
+
     try {
-      await axios.post("http://10.0.0.9:3000/api/meetings", meetingData);
-      await axios.put(`http://10.0.0.9:3000/api/posts/${selectedPost._id}`, {
-        musicians: updatedMusicians,
-        friends: updatedFriends,
-      });
+      const meetingResponse = await axios.post(
+        "http://10.0.0.9:3000/api/meetings",
+        meetingData
+      );
+      console.log("Meeting created successfully:", meetingResponse.data);
+
+      const postUpdateResponse = await axios.put(
+        `http://10.0.0.9:3000/api/posts/${selectedPost._id}`,
+        {
+          musicians: updatedMusicians,
+          friends: updatedFriends,
+        }
+      );
+      console.log("Post updated successfully:", postUpdateResponse.data);
 
       setPosts((prevPosts) =>
         prevPosts.map((post) =>
